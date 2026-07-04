@@ -1,4 +1,0 @@
-interface:
-  display_name: "Workflow Insights"
-  short_description: "Find reusable assets in repeated work"
-  default_prompt: "Use $workflow-insights to review my recent work and suggest reusable skills, subagents, or automations."
