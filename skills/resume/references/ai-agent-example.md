@@ -1,13 +1,15 @@
 # AI Agent Resume Example
 
-Use this reference when rewriting AI Agent, AI application, RAG, or LLM workflow project experience.
+Use this generic, fictional reference when rewriting AI Agent, AI application, RAG, or LLM workflow project experience.
+
+Do not encode a specific user's personal projects, employers, repositories, metrics, or domain background into this example. Replace the scenario, stack, and metrics with the user's real evidence during resume optimization.
 
 ## Scenario
 
 The user provides rough notes such as:
 
 ```text
-我做过一个智能客服 Agent，用 LangChain / LangGraph 和 RAG，接了公司知识库，可以回答用户问题。也做了工具调用，可以查订单。用了 Redis 存对话历史，做了 Prompt 优化。
+我做过一个智能客服 Agent，用 LangChain / LangGraph 和 RAG，接了内部知识库，可以回答用户问题。也做了工具调用，可以查售后工单。用了 Redis 存对话历史，做了 Prompt 优化。
 ```
 
 The goal is to turn vague notes into resume-ready bullets with ownership, technical depth, reliability thinking, and results.
@@ -34,25 +36,25 @@ The goal is to turn vague notes into resume-ready bullets with ownership, techni
 ## Better Version
 
 ```text
-负责智能客服 Agent 核心链路设计与开发，面向用户售前咨询、产品 FAQ 和订单状态查询等场景，构建基于 RAG + Tool Calling 的多轮问答系统。
-基于 LangGraph 设计 Agent Workflow，将用户问题处理流程拆分为意图识别、知识库检索、工具路由、结果校验和回答合成等阶段，提升 Agent 行为的可控性与可维护性。
+负责智能客服 Agent 核心链路设计与开发，面向用户售前咨询、产品 FAQ 和售后工单查询等场景，构建基于 RAG + Tool Calling 的多轮问答系统。
+基于 Agent Workflow 设计问题处理流程，将用户请求拆分为意图识别、知识库检索、工具路由、结果校验和回答合成等阶段，提升 Agent 行为的可控性与可维护性。
 负责知识库 RAG 链路建设，对产品文档、FAQ 和运营规则进行清洗、切分、Embedding 和向量检索，并在回答中返回引用来源，降低模型幻觉风险。
-设计订单查询工具的 Tool Schema 与调用链路，支持 Agent 根据用户意图调用订单状态查询接口，并针对接口超时、参数缺失和权限不足等场景增加重试、降级和兜底回复。
+设计工单查询工具的 Tool Schema 与调用链路，支持 Agent 根据用户意图调用售后工单接口，并针对接口超时、参数缺失和权限不足等场景增加重试、降级和兜底回复。
 基于 Redis 实现多轮对话状态管理和会话持久化，对长对话进行摘要压缩，降低上下文 token 消耗并保持核心上下文连续性。
 沉淀客服 Agent Prompt 模板、工具调用失败处理策略和问题分类规则，支持内部测试和业务场景验证。
 ```
 
 ## Strong Version with Real Metrics
 
-Only use this level of specificity when the user has provided real metrics.
+Only use this level of specificity when the user has provided real metrics. The numbers below are fictional examples and must not be reused as real user metrics.
 
 ```text
-负责智能客服 Agent 核心链路设计与上线，面向售前咨询、产品 FAQ 和订单状态查询等场景，构建基于 RAG + Tool Calling 的多轮问答系统，支撑日均 3000+ 用户会话。
-基于 LangGraph 设计 Agent Workflow，将用户问题处理流程拆分为意图识别、知识库检索、工具路由、结果校验和回答合成等阶段，使复杂客服问题从单轮问答升级为可控的多步骤处理流程。
-负责知识库 RAG 链路建设，对 500+ 篇产品文档进行清洗、切分、Embedding 和向量检索，并增加引用来源、结果校验和兜底回复，将高频问题回答准确率从 67% 提升至 91%。
-设计订单查询工具的 Tool Schema 与调用链路，支持 Agent 根据用户意图调用订单状态查询接口，并针对接口超时、参数缺失和权限不足等场景增加重试、降级和兜底回复，工具调用失败后的有效兜底率提升至 95%+。
-基于 Redis 实现多轮对话状态管理和会话持久化，对超过 20 轮的长对话触发摘要压缩，将单次推理上下文 token 消耗从 8000+ 降低至 2000 以内。
-上线后人工转接率从 45% 降低至 12%，客服平均响应时延从 4.2 秒优化至 1.1 秒，显著降低人工客服压力和用户等待时间。
+负责智能客服 Agent 核心链路设计与上线，面向售前咨询、产品 FAQ 和售后工单查询等场景，构建基于 RAG + Tool Calling 的多轮问答系统，支撑日均 [补充真实会话量] 用户会话。
+基于 Agent Workflow 设计问题处理流程，将用户请求拆分为意图识别、知识库检索、工具路由、结果校验和回答合成等阶段，使复杂客服问题从单轮问答升级为可控的多步骤处理流程。
+负责知识库 RAG 链路建设，对 [补充文档规模] 产品文档进行清洗、切分、Embedding 和向量检索，并增加引用来源、结果校验和兜底回复，使高频问题回答准确率提升 [补充真实提升比例]。
+设计工单查询工具的 Tool Schema 与调用链路，支持 Agent 根据用户意图调用售后工单接口，并针对接口超时、参数缺失和权限不足等场景增加重试、降级和兜底回复，提升工具调用失败后的有效兜底率。
+基于 Redis 实现多轮对话状态管理和会话持久化，对超过 [补充轮数] 轮的长对话触发摘要压缩，将单次推理上下文 token 消耗从 [补充优化前] 降低至 [补充优化后]。
+上线后人工转接率从 [补充优化前] 降低至 [补充优化后]，客服平均响应时延从 [补充优化前] 优化至 [补充优化后]，降低人工客服压力和用户等待时间。
 ```
 
 ## If Metrics Are Missing
@@ -60,10 +62,10 @@ Only use this level of specificity when the user has provided real metrics.
 Do not fabricate numbers. Use truthful qualitative results or placeholders.
 
 ```text
-负责智能客服 Agent 核心链路设计与开发，面向售前咨询、产品 FAQ 和订单状态查询等场景，构建基于 RAG + Tool Calling 的多轮问答系统，完成内部 PoC 验证。
-基于 LangGraph 设计 Agent Workflow，将用户问题处理流程拆分为意图识别、知识库检索、工具路由、结果校验和回答合成等阶段，提升 Agent 行为的可控性与可维护性。
+负责智能客服 Agent 核心链路设计与开发，面向售前咨询、产品 FAQ 和售后工单查询等场景，构建基于 RAG + Tool Calling 的多轮问答系统，完成内部 PoC 验证。
+基于 Agent Workflow 设计问题处理流程，将用户请求拆分为意图识别、知识库检索、工具路由、结果校验和回答合成等阶段，提升 Agent 行为的可控性与可维护性。
 负责知识库 RAG 链路建设，对产品文档、FAQ 和运营规则进行清洗、切分、Embedding 和向量检索，并在回答中返回引用来源，降低模型幻觉风险。
-设计订单查询工具的 Tool Schema 与调用链路，支持 Agent 根据用户意图调用订单状态查询接口，并针对接口超时、参数缺失和权限不足等场景增加重试、降级和兜底回复。
+设计工单查询工具的 Tool Schema 与调用链路，支持 Agent 根据用户意图调用售后工单接口，并针对接口超时、参数缺失和权限不足等场景增加重试、降级和兜底回复。
 基于 Redis 实现多轮对话状态管理和会话持久化，对长对话进行摘要压缩，降低上下文 token 消耗并保持核心上下文连续性。
 沉淀客服 Agent Prompt 模板、工具调用失败处理策略和问题分类规则，支持后续接入真实客服场景。
 ```
@@ -210,7 +212,7 @@ Good:
 Strong:
 
 ```text
-负责企业知识库 RAG 问答链路建设，对 500+ 篇产品文档进行清洗、切分、Embedding 和向量检索，并增加引用来源、结果校验和兜底回复，使高频问题回答准确率从 72% 提升至 90%+。
+负责企业知识库 RAG 问答链路建设，对 [补充文档规模] 产品文档进行清洗、切分、Embedding 和向量检索，并增加引用来源、结果校验和兜底回复，使高频问题回答准确率提升 [补充真实指标]。
 ```
 
 ### Tool Calling
@@ -218,13 +220,13 @@ Strong:
 Bad:
 
 ```text
-接入了工具调用，可以查订单。
+接入了工具调用，可以查工单。
 ```
 
 Good:
 
 ```text
-设计订单查询工具的 Tool Schema 与调用链路，支持 Agent 根据用户意图调用订单状态查询接口，并针对参数缺失、接口超时和权限不足等场景增加重试、降级和兜底回复。
+设计工单查询工具的 Tool Schema 与调用链路，支持 Agent 根据用户意图调用售后工单接口，并针对参数缺失、接口超时和权限不足等场景增加重试、降级和兜底回复。
 ```
 
 ### Memory
@@ -252,7 +254,7 @@ Bad:
 Good:
 
 ```text
-基于 LangGraph 设计多阶段 Agent Workflow，将用户问题处理流程拆分为意图识别、知识库检索、工具路由、结果校验和回答合成等阶段，提升复杂问题处理的可控性和可维护性。
+设计多阶段 Agent Workflow，将用户问题处理流程拆分为意图识别、知识库检索、工具路由、结果校验和回答合成等阶段，提升复杂问题处理的可控性和可维护性。
 ```
 
 ### Production
@@ -266,13 +268,13 @@ Bad:
 Good:
 
 ```text
-完成内部 PoC 验证，并接入客服测试环境，支持产品 FAQ、订单状态查询和人工转接等核心场景。
+完成内部 PoC 验证，并接入客服测试环境，支持产品 FAQ、售后工单查询和人工转接等核心场景。
 ```
 
 Strong:
 
 ```text
-项目上线后支撑日均 3000+ 用户会话，人工转接率从 45% 降低至 12%，客服平均响应时延从 4.2 秒优化至 1.1 秒。
+项目上线后支撑日均 [补充真实会话量] 用户会话，人工转接率从 [补充优化前] 降低至 [补充优化后]，客服平均响应时延从 [补充优化前] 优化至 [补充优化后]。
 ```
 
 ## Interview Risk Notes
