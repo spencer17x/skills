@@ -14,9 +14,9 @@ Use a flat skill layout:
 skills/
   <skill-name>/
     SKILL.md
-    references/
-    scripts/
-    assets/
+    references/  # optional
+    scripts/     # optional
+    assets/      # optional
 ```
 
 Only create `references/`, `scripts/`, or `assets/` when the skill actually
