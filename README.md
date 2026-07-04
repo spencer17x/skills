@@ -28,6 +28,7 @@ skills directly under `skills/<skill-name>/`.
 | Skill | Description |
 | --- | --- |
 | `figma-ui` | Implement UI from Figma or visual references with project tokens, component reuse, flex-first layout, explicit sizing decisions, and high visual fidelity. |
+| `resume` | Optimize, rewrite, review, or tailor resumes from uploaded resumes, rough experience notes, skills, target roles, or job descriptions with ownership, evidence, impact, and interview-ready positioning. |
 | `workflow-insights` | Review recent work and suggest reusable skills, subagents, automations, or deliberate skips for repeated workflows. |
 
 ## Conventions
