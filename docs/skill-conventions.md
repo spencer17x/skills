@@ -5,7 +5,7 @@ text-based and avoid mixing in standalone MCP servers.
 
 ## Repository Layout
 
-Prefer a flat layout while the skill library is small:
+Use a flat layout for skills:
 
 ```text
 skills/
@@ -17,20 +17,14 @@ skills/
 scripts/
 ```
 
-Use category folders only when the library grows enough that flat discovery is
-hard. Categories should emerge from real skill usage rather than being added too
-early.
+All installable skills should live directly under `skills/<skill-name>/`.
+Do not create category folders such as `skills/engineering/` or
+`skills/writing/` by default. If the repository becomes large enough to need
+navigation help, add an index or metadata first before introducing nested
+categories.
 
-Possible future categories:
-
-- `skills/engineering/`: coding workflows, review habits, debugging, testing.
-- `skills/writing/`: voice, editing, drafting, publishing.
-- `skills/productivity/`: planning, handoffs, notes, recurring work.
-- `skills/research/`: source evaluation, synthesis, reading workflows.
-- `skills/personal/`: personal preferences and reusable context.
-- `skills/in-progress/`: draft skills that are not ready to install by default.
-- `skills/deprecated/`: archived skills kept for reference.
-- `scripts/`: repository maintenance scripts only.
+The root-level `scripts/` directory is reserved for repository maintenance
+scripts only.
 
 ## Skill Layout
 
