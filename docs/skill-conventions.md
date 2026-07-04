@@ -5,6 +5,24 @@ text-based and avoid mixing in standalone MCP servers.
 
 ## Repository Layout
 
+Prefer a flat layout while the skill library is small:
+
+```text
+skills/
+  skill-name/
+    SKILL.md
+    references/
+    scripts/
+    assets/
+scripts/
+```
+
+Use category folders only when the library grows enough that flat discovery is
+hard. Categories should emerge from real skill usage rather than being added too
+early.
+
+Possible future categories:
+
 - `skills/engineering/`: coding workflows, review habits, debugging, testing.
 - `skills/writing/`: voice, editing, drafting, publishing.
 - `skills/productivity/`: planning, handoffs, notes, recurring work.
@@ -19,7 +37,7 @@ text-based and avoid mixing in standalone MCP servers.
 Each skill should use this shape:
 
 ```text
-skill-name/
+skills/skill-name/
   SKILL.md
   references/
   scripts/

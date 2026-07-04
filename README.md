@@ -8,15 +8,31 @@ at the repo root.
 
 ## Structure
 
+Start with a flat skill layout:
+
 ```text
 skills/
-  engineering/   Coding workflows, review habits, debugging, testing
-  writing/       Voice, editing, drafting, and publishing workflows
-  productivity/  Planning, handoffs, notes, and recurring work
-  research/      Source evaluation, synthesis, and reading workflows
-  personal/      Personal preferences and reusable context
-  in-progress/   Draft skills that are not ready to install by default
-  deprecated/    Archived skills kept for reference
+  figma-ui/
+    SKILL.md
+    references/
+      implementation-guide.md
+```
+
+Each skill should live directly under `skills/<skill-name>/` while the library is
+small. Introduce category folders later only when the number of skills grows and
+clear groupings emerge.
+
+Possible future categories include:
+
+```text
+skills/
+  engineering/
+  writing/
+  productivity/
+  research/
+  personal/
+  in-progress/
+  deprecated/
 ```
 
 ## Conventions
