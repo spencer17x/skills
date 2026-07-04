@@ -2,43 +2,38 @@
 
 Personal AI agent skills collection.
 
-This repository is organized as a lightweight skills library: concise `SKILL.md`
-files live under `skills/`, while shared conventions and maintenance scripts stay
-at the repo root.
+This repository is organized as a lightweight skills library: each skill lives as
+a self-contained folder directly under `skills/`, while shared conventions and
+maintenance scripts stay at the repo root.
 
 ## Structure
 
-Start with a flat skill layout:
+Use a flat skill layout:
 
 ```text
 skills/
-  figma-ui/
+  <skill-name>/
     SKILL.md
     references/
-      implementation-guide.md
+    scripts/
+    assets/
 ```
 
-Each skill should live directly under `skills/<skill-name>/` while the library is
-small. Introduce category folders later only when the number of skills grows and
-clear groupings emerge.
+Only create `references/`, `scripts/`, or `assets/` when the skill actually
+needs them. Do not create category folders under `skills/` by default; keep all
+skills directly under `skills/<skill-name>/`.
 
-Possible future categories include:
+## Available Skills
 
-```text
-skills/
-  engineering/
-  writing/
-  productivity/
-  research/
-  personal/
-  in-progress/
-  deprecated/
-```
+| Skill | Description |
+| --- | --- |
+| `figma-ui` | Implement UI from Figma or visual references with project tokens, component reuse, flex-first layout, explicit sizing decisions, and high visual fidelity. |
 
 ## Conventions
 
 - Keep each skill in its own folder with a required `SKILL.md`.
 - Use lowercase kebab-case names for skill folders.
+- Keep the folder name and the `name` field in `SKILL.md` aligned.
 - Put detailed reference material in a skill's `references/` folder.
 - Put deterministic helper scripts in a skill's `scripts/` folder.
 - Put templates or reusable output files in a skill's `assets/` folder.
