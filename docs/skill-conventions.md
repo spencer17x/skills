@@ -11,9 +11,9 @@ Use a flat layout for skills:
 skills/
   skill-name/
     SKILL.md
-    references/
-    scripts/
-    assets/
+    references/  # optional
+    scripts/     # optional
+    assets/      # optional
 scripts/
 ```
 
@@ -33,9 +33,9 @@ Each skill should use this shape:
 ```text
 skills/skill-name/
   SKILL.md
-  references/
-  scripts/
-  assets/
+  references/  # optional
+  scripts/     # optional
+  assets/      # optional
 ```
 
 Only create `references/`, `scripts/`, or `assets/` when the skill actually
