@@ -2,6 +2,8 @@
 
 Detailed reference for the `resume` skill.
 
+All examples in this guide are generic and illustrative. Do not encode a specific user's personal work history, companies, projects, or open-source identity into this skill.
+
 ## Core Principle
 
 A strong resume should not only say what the candidate knows. It should show:
@@ -175,7 +177,7 @@ Bad:
 Good:
 
 ```text
-负责后台系统核心页面开发，基于 Vue3 和 TypeScript 实现配置管理、数据查询和权限控制等模块，并抽象通用表单、表格和弹窗组件，提升后续业务页面交付效率。
+负责后台配置系统核心页面开发，基于 Vue3 和 TypeScript 实现配置管理、数据查询和权限控制等模块，并抽象通用表单、表格和弹窗组件，提升后续业务页面交付效率。
 ```
 
 ### Weak project ownership
@@ -183,13 +185,13 @@ Good:
 Bad:
 
 ```text
-参与订单系统开发，负责部分接口联调。
+参与审批系统开发，负责部分接口联调。
 ```
 
 Good:
 
 ```text
-负责订单列表与订单详情模块开发，围绕订单状态流转、异常状态展示和用户操作反馈设计前端交互逻辑，并与后端完成接口协议对齐，保障核心订单链路稳定交付。
+负责审批列表与审批详情模块开发，围绕审批状态流转、异常状态展示和用户操作反馈设计前端交互逻辑，并与后端完成接口协议对齐，保障核心审批链路稳定交付。
 ```
 
 ### Weak performance description
@@ -203,7 +205,7 @@ Bad:
 Good:
 
 ```text
-针对高频数据刷新导致的页面卡顿问题，重构状态更新链路并拆分高频渲染组件，减少无效重渲染，使核心页面交互性能提升 40%+。
+针对大数据表格筛选和批量操作导致的页面卡顿问题，重构状态更新链路并拆分高频渲染组件，减少无效重渲染，使核心页面交互性能提升 [补充具体比例]。
 ```
 
 ### Weak AI project description
@@ -246,22 +248,22 @@ Translate existing experience into the language of the target role.
 - 性能优化 → user experience and responsiveness improvement.
 - E2E 测试 → product quality assurance.
 
-### Backend to AI / Agent engineering
+### Backend to automation or AI engineering
 
-- API design → tool schema design.
+- API design → tool schema or integration contract design.
 - Service governance → tool reliability and fallback.
-- Cache strategy → context or retrieval cache.
-- Circuit breaker → tool timeout and graceful degradation.
+- Cache strategy → context, retrieval, or response cache.
+- Circuit breaker → timeout and graceful degradation.
 - Logs and monitoring → observability.
-- Workflow orchestration → agent workflow design.
+- Workflow orchestration → multi-step workflow design.
 
-### Trading system to complex system engineering
+### Business systems to complex system engineering
 
-- 订单状态流转 → state machine and lifecycle modeling.
-- 高频行情数据 → high-frequency data rendering or streaming.
-- 盘口 / 仓位 → real-time data consistency.
-- 风控 / 异常状态 → edge case handling and fallback.
+- 状态流转 → state machine and lifecycle modeling.
+- 实时数据 → streaming, synchronization, or consistency handling.
+- 权限 / 风控 / 异常状态 → edge case handling and fallback.
 - E2E 测试 → critical path validation.
+- 多角色流程 → workflow and permission modeling.
 
 ### Open source to engineering credibility
 
@@ -269,6 +271,8 @@ Translate existing experience into the language of the target role.
 - Organization membership → trusted community participation.
 - Documentation contribution → ecosystem collaboration.
 - Tooling contribution → infrastructure and developer experience awareness.
+
+Only use open-source examples when the user has provided real contribution evidence.
 
 ## Section Guidelines
 
@@ -292,7 +296,7 @@ Avoid generic phrases like:
 Prefer concrete positioning:
 
 ```text
-具备前端 / 全栈工程经验，长期负责交易系统、工程化平台和 AI 应用项目落地，擅长将复杂业务流程拆解为可维护的系统架构，并通过性能优化、自动化测试和工程化建设提升交付质量。
+具备前端 / 全栈工程经验，长期负责复杂业务系统和工程化项目落地，擅长将业务流程拆解为可维护的系统架构，并通过性能优化、自动化测试和工程化建设提升交付质量。
 ```
 
 ### Skills
@@ -331,7 +335,7 @@ A good project description should include:
 
 ### Open source
 
-Open-source contributions should not be written only as links. Explain what they prove:
+Open-source contributions should not be written only as links. Explain what they prove, but only when the user has provided real evidence:
 
 - Large codebase reading ability.
 - Community collaboration.
