@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resume"
+  short_description: "Create polished resume outputs"
+  default_prompt: "Use $resume to draft a two-page English PDF resume."

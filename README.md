@@ -28,7 +28,7 @@ skills directly under `skills/<skill-name>/`.
 | Skill | Description |
 | --- | --- |
 | `figma-ui` | Implement UI from Figma or visual references with project tokens, component reuse, flex-first layout, explicit sizing decisions, and high visual fidelity. |
-| `resume` | Optimize, rewrite, review, or tailor resumes from uploaded resumes, rough experience notes, skills, target roles, or job descriptions with ownership, evidence, impact, and interview-ready positioning. |
+| `resume` | Create, revise, tailor, review, or export resume materials with ownership, evidence, impact, and interview-ready positioning. |
 | `workflow-insights` | Review recent work and suggest reusable skills, subagents, automations, or deliberate skips for repeated workflows. |
 
 ## Conventions
@@ -36,6 +36,8 @@ skills directly under `skills/<skill-name>/`.
 - Keep each skill in its own folder with a required `SKILL.md`.
 - Use lowercase kebab-case names for skill folders.
 - Keep the folder name and the `name` field in `SKILL.md` aligned.
+- Use one primary language per skill; do not mix Chinese and English in the
+  same skill unless the skill explicitly handles bilingual content.
 - Put detailed reference material in a skill's `references/` folder.
 - Put deterministic helper scripts in a skill's `scripts/` folder.
 - Put templates or reusable output files in a skill's `assets/` folder.

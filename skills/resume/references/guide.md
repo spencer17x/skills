@@ -20,43 +20,22 @@ Avoid resumes that only list technologies or responsibilities. Prefer resumes th
 
 ### Avoid overusing weak verbs
 
-- 熟悉
-- 了解
-- 掌握
-- 参与
-- 协助
-- 负责开发
-- 搭建
-- 接入
-- 使用
-- 维护
+- familiar with
+- understands
+- knows
+- participated in
+- helped with
+- used
+- maintained
+- built
+- integrated
+- responsible for development
 
-These words are not always wrong, but they are weak when used alone.
+These phrases are not always wrong, but they are weak when used alone.
 
 ### Prefer ownership verbs
 
 Use stronger verbs when accurate:
-
-- 负责
-- 独立负责
-- 主导
-- 设计
-- 实现
-- 落地
-- 上线
-- 重构
-- 优化
-- 封装
-- 沉淀
-- 推动
-- 交付
-- 排查
-- 解决
-- 降低
-- 提升
-- 保障
-
-English equivalents:
 
 - owned
 - designed
@@ -74,6 +53,9 @@ English equivalents:
 - productionized
 - stabilized
 - automated
+- debugged
+- delivered
+- validated
 
 ## Resume Bullet Formula
 
@@ -83,13 +65,7 @@ Use this formula:
 Business context + ownership + technical solution + challenge + result
 ```
 
-Chinese version:
-
-```text
-负责 / 主导 X，在 Y 场景下，通过 Z 方案解决 A 问题，最终提升 / 降低 / 支撑 / 保障 B。
-```
-
-English version:
+Example:
 
 ```text
 Owned X for Y scenario, implemented Z to solve A, resulting in B.
@@ -105,7 +81,7 @@ Before adding a project to a resume, check whether it answers:
 4. What was difficult about the project?
 5. What trade-offs or design decisions were made?
 6. How was reliability, performance, quality, or maintainability handled?
-7. Was it shipped, launched, used internally, validated as a PoC, or only a demo?
+7. Was it shipped, launched, used internally, validated as a proof of concept, or only a demo?
 8. What measurable or observable result did it produce?
 
 If a project cannot answer most of these, either rewrite it with more detail or remove it.
@@ -154,13 +130,13 @@ Use real metrics when available.
 
 If exact numbers are unavailable, use truthful qualitative impact:
 
-- 支持真实客户落地
-- 完成内部 PoC 验证
-- 支撑核心业务流程
-- 提升后续迭代效率
-- 降低维护成本
-- 改善问题排查效率
-- 支持多项目复用
+- Supported real customer delivery.
+- Completed internal proof-of-concept validation.
+- Supported a core business workflow.
+- Improved future iteration speed.
+- Reduced maintenance cost.
+- Improved debugging efficiency.
+- Enabled reuse across multiple projects.
 
 Never fabricate metrics.
 
@@ -171,13 +147,13 @@ Never fabricate metrics.
 Bad:
 
 ```text
-熟悉 React、Vue、TypeScript，参与后台系统开发。
+Familiar with React, Vue, and TypeScript; participated in admin system development.
 ```
 
 Good:
 
 ```text
-负责后台配置系统核心页面开发，基于 Vue3 和 TypeScript 实现配置管理、数据查询和权限控制等模块，并抽象通用表单、表格和弹窗组件，提升后续业务页面交付效率。
+Owned core pages for an internal configuration system, implementing configuration management, data search, and permission-control modules with Vue 3 and TypeScript, and extracted reusable form, table, and modal components to speed up delivery of future business pages.
 ```
 
 ### Weak project ownership
@@ -185,13 +161,13 @@ Good:
 Bad:
 
 ```text
-参与审批系统开发，负责部分接口联调。
+Participated in approval system development and handled some API integration.
 ```
 
 Good:
 
 ```text
-负责审批列表与审批详情模块开发，围绕审批状态流转、异常状态展示和用户操作反馈设计前端交互逻辑，并与后端完成接口协议对齐，保障核心审批链路稳定交付。
+Owned the approval list and detail modules, designed front-end interactions for approval-state transitions, exceptional states, and user feedback, and aligned API contracts with backend engineers to deliver the core approval workflow reliably.
 ```
 
 ### Weak performance description
@@ -199,13 +175,13 @@ Good:
 Bad:
 
 ```text
-优化页面性能，提升用户体验。
+Optimized page performance and improved user experience.
 ```
 
 Good:
 
 ```text
-针对大数据表格筛选和批量操作导致的页面卡顿问题，重构状态更新链路并拆分高频渲染组件，减少无效重渲染，使核心页面交互性能提升 [补充具体比例]。
+Refactored state updates and split high-frequency rendering components for large data-table filtering and batch operations, reducing unnecessary rerenders and improving core interaction responsiveness by [add verified percentage].
 ```
 
 ### Weak AI project description
@@ -213,13 +189,13 @@ Good:
 Bad:
 
 ```text
-熟悉 RAG，搭建了知识库问答系统。
+Familiar with RAG and built a knowledge-base Q&A system.
 ```
 
 Good:
 
 ```text
-设计并实现知识库问答链路，对文档进行切分、向量化、检索和答案合成，并增加引用来源、结果校验和异常兜底策略，提升问答可信度并降低模型幻觉风险。
+Designed and implemented a knowledge-base Q&A pipeline covering document chunking, embedding, retrieval, answer synthesis, source citation, result validation, and fallback handling to improve answer trustworthiness and reduce hallucination risk.
 ```
 
 ### Weak backend description
@@ -227,13 +203,13 @@ Good:
 Bad:
 
 ```text
-负责接口开发和系统维护。
+Responsible for API development and system maintenance.
 ```
 
 Good:
 
 ```text
-负责核心业务接口设计与性能优化，针对高并发查询场景引入缓存和分页策略，降低数据库压力，并通过日志监控和异常告警提升线上问题定位效率。
+Designed and optimized core business APIs for high-concurrency query scenarios, introduced caching and pagination to reduce database pressure, and improved production troubleshooting through structured logging, monitoring, and alerting.
 ```
 
 ## Role Translation Rules
@@ -242,35 +218,35 @@ Translate existing experience into the language of the target role.
 
 ### Frontend to product engineering
 
-- 页面开发 → user workflow implementation.
-- 组件封装 → reusable UI system.
-- 状态管理 → complex interaction state modeling.
-- 性能优化 → user experience and responsiveness improvement.
-- E2E 测试 → product quality assurance.
+- Page development -> user workflow implementation.
+- Component extraction -> reusable UI system.
+- State management -> complex interaction state modeling.
+- Performance optimization -> user experience and responsiveness improvement.
+- End-to-end testing -> product quality assurance.
 
 ### Backend to automation or AI engineering
 
-- API design → tool schema or integration contract design.
-- Service governance → tool reliability and fallback.
-- Cache strategy → context, retrieval, or response cache.
-- Circuit breaker → timeout and graceful degradation.
-- Logs and monitoring → observability.
-- Workflow orchestration → multi-step workflow design.
+- API design -> tool schema or integration contract design.
+- Service governance -> tool reliability and fallback.
+- Cache strategy -> context, retrieval, or response cache.
+- Circuit breaker -> timeout and graceful degradation.
+- Logs and monitoring -> observability.
+- Workflow orchestration -> multi-step workflow design.
 
 ### Business systems to complex system engineering
 
-- 状态流转 → state machine and lifecycle modeling.
-- 实时数据 → streaming, synchronization, or consistency handling.
-- 权限 / 风控 / 异常状态 → edge case handling and fallback.
-- E2E 测试 → critical path validation.
-- 多角色流程 → workflow and permission modeling.
+- State transitions -> state machine and lifecycle modeling.
+- Real-time data -> streaming, synchronization, or consistency handling.
+- Permissions, risk controls, and exceptional states -> edge case handling and fallback.
+- End-to-end testing -> critical path validation.
+- Multi-role processes -> workflow and permission modeling.
 
 ### Open source to engineering credibility
 
-- PR contribution → ability to read large codebases.
-- Organization membership → trusted community participation.
-- Documentation contribution → ecosystem collaboration.
-- Tooling contribution → infrastructure and developer experience awareness.
+- Pull request contribution -> ability to read large codebases.
+- Organization membership -> trusted community participation.
+- Documentation contribution -> ecosystem collaboration.
+- Tooling contribution -> infrastructure and developer experience awareness.
 
 Only use open-source examples when the user has provided real contribution evidence.
 
@@ -290,13 +266,13 @@ What real systems or projects have they shipped?
 Avoid generic phrases like:
 
 ```text
-热爱技术，学习能力强，抗压能力强。
+Passionate about technology, fast learner, and able to work under pressure.
 ```
 
 Prefer concrete positioning:
 
 ```text
-具备前端 / 全栈工程经验，长期负责复杂业务系统和工程化项目落地，擅长将业务流程拆解为可维护的系统架构，并通过性能优化、自动化测试和工程化建设提升交付质量。
+Frontend and full-stack engineer experienced in delivering complex business systems and engineering platforms, with strengths in decomposing workflows into maintainable architecture and improving delivery quality through performance optimization, automated testing, and engineering tooling.
 ```
 
 ### Skills
@@ -363,11 +339,11 @@ Strong bullets naturally invite useful follow-up questions:
 
 Avoid bullets that invite dangerous follow-ups:
 
-- “你说熟悉，具体用过什么？”
-- “你参与了哪部分？”
-- “这个项目上线了吗？”
-- “这个指标怎么来的？”
-- “这是你做的还是团队做的？”
+- "You said you are familiar with this. What exactly did you use?"
+- "Which part did you personally own?"
+- "Was this project launched?"
+- "Where did this metric come from?"
+- "Was this your work or the team's work?"
 
 ## Red Flags
 

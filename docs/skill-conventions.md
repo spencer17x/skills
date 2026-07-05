@@ -47,6 +47,17 @@ needs them.
 - Prefer short, action-oriented names, such as `review-pr` or `draft-handoff`.
 - Keep the folder name and the `name` field in `SKILL.md` aligned.
 
+## Language Consistency
+
+- Choose one primary language for each skill and keep the frontmatter, body,
+  references, scripts help text, and `agents/openai.yaml` metadata in that
+  language.
+- Do not mix Chinese and English in the same skill unless the skill explicitly
+  handles bilingual content, translation, localization, or multilingual test
+  cases.
+- When a skill produces user-facing artifacts, ask or infer the requested output
+  language and keep the artifact consistent with that language.
+
 ## SKILL.md
 
 - Keep the YAML frontmatter to `name` and `description`.
