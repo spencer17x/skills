@@ -1,0 +1,220 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "json"
+require "open3"
+require "pathname"
+require "tmpdir"
+require "yaml"
+
+ROOT = Pathname.new(__dir__).join("..").realpath
+ERRORS = []
+
+def rel(path)
+  Pathname.new(path).relative_path_from(ROOT).to_s
+end
+
+def add_error(message)
+  ERRORS << message
+end
+
+def parse_frontmatter(path)
+  text = File.read(path)
+  match = text.match(/\A---\n(.*?)\n---\n/m)
+  unless match
+    add_error("#{rel(path)}: missing YAML frontmatter")
+    return nil
+  end
+
+  YAML.safe_load(match[1]) || {}
+rescue Psych::Exception => e
+  add_error("#{rel(path)}: invalid YAML frontmatter: #{e.message}")
+  nil
+end
+
+def validate_skill(skill_dir)
+  folder_name = File.basename(skill_dir)
+  skill_file = File.join(skill_dir, "SKILL.md")
+
+  unless File.file?(skill_file)
+    add_error("#{rel(skill_dir)}: missing SKILL.md")
+    return
+  end
+
+  unless folder_name.match?(/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/)
+    add_error("#{rel(skill_dir)}: folder name must be lowercase kebab-case")
+  end
+
+  metadata = parse_frontmatter(skill_file)
+  return unless metadata
+
+  unless metadata.is_a?(Hash)
+    add_error("#{rel(skill_file)}: frontmatter must be a YAML mapping")
+    return
+  end
+
+  keys = metadata.keys.map(&:to_s)
+  missing = %w[name description] - keys
+  extra = keys - %w[name description]
+
+  add_error("#{rel(skill_file)}: missing frontmatter keys: #{missing.join(", ")}") unless missing.empty?
+  add_error("#{rel(skill_file)}: unexpected frontmatter keys: #{extra.join(", ")}") unless extra.empty?
+
+  skill_name = metadata["name"].to_s
+  description = metadata["description"].to_s
+
+  if skill_name != folder_name
+    add_error("#{rel(skill_file)}: name #{skill_name.inspect} must match folder #{folder_name.inspect}")
+  end
+
+  if description.strip.empty?
+    add_error("#{rel(skill_file)}: description must be non-empty")
+  elsif description.length > 1024
+    add_error("#{rel(skill_file)}: description must be 1024 characters or fewer")
+  end
+end
+
+def validate_agent_yaml
+  Dir.glob(ROOT.join("skills/*/agents/*.yaml")).sort.each do |path|
+    YAML.safe_load(File.read(path))
+  rescue Psych::Exception => e
+    add_error("#{rel(path)}: invalid YAML: #{e.message}")
+  end
+end
+
+def validate_github_workflows
+  Dir.glob(ROOT.join(".github/workflows/*.{yml,yaml}")).sort.each do |path|
+    YAML.safe_load(File.read(path))
+  rescue Psych::Exception => e
+    add_error("#{rel(path)}: invalid YAML: #{e.message}")
+  end
+end
+
+def markdown_files
+  patterns = [
+    "README.md",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "docs/**/*.md",
+    "skills/**/*.md"
+  ]
+
+  patterns.flat_map { |pattern| Dir.glob(ROOT.join(pattern)) }.uniq.sort
+end
+
+def validate_markdown_links
+  markdown_files.each do |file|
+    text = File.read(file)
+    text.scan(/(?<!!)\[[^\]]+\]\(([^)]+)\)/).flatten.each do |raw_target|
+      target = raw_target.strip
+      target = target[1...-1] if target.start_with?("<") && target.end_with?(">")
+      next if target.start_with?("#")
+      next if target.match?(/\A[a-z][a-z0-9+.-]*:/i)
+
+      local_target = target.split("#", 2).first
+      next if local_target.nil? || local_target.empty?
+
+      path = File.expand_path(local_target, File.dirname(file))
+      add_error("#{rel(file)}: missing linked file #{target}") unless File.exist?(path)
+    end
+  end
+end
+
+def run_command(command, failure_label)
+  stdout, stderr, status = Open3.capture3(*command, chdir: ROOT.to_s)
+  return if status.success?
+
+  output = [stdout, stderr].reject(&:empty?).join("\n").strip
+  add_error("#{failure_label}: #{output.empty? ? "exit #{status.exitstatus}" : output}")
+end
+
+def validate_shell_scripts
+  Dir.glob(ROOT.join("{scripts,skills/*/scripts}/**/*.sh")).sort.each do |path|
+    run_command(["bash", "-n", path], "#{rel(path)} failed bash syntax check")
+  end
+end
+
+def validate_workflow_inventory_fixture
+  script = ROOT.join("skills/workflow-insights/scripts/codex-session-task-inventory.sh")
+  return unless File.file?(script)
+
+  _, _, jq_status = Open3.capture3("sh", "-c", "command -v jq")
+  unless jq_status.success?
+    add_error("jq is required to validate #{rel(script)}")
+    return
+  end
+
+  Dir.mktmpdir("skills-validation") do |dir|
+    fixture = File.join(dir, "fixture.jsonl")
+    File.write(
+      fixture,
+      [
+        {
+          type: "session_meta",
+          payload: {
+            timestamp: "2026-07-09T12:34:56Z",
+            thread_source: "main",
+            agent_role: "codex",
+            cwd: "/Users/17a/projects/demo"
+          }
+        },
+        {
+          type: "response_item",
+          payload: {
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "<environment_context>ignored</environment_context>" }]
+          }
+        },
+        {
+          type: "response_item",
+          payload: {
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "review project\ncheck issues" }]
+          }
+        }
+      ].map { |record| record.to_json }.join("\n") + "\n"
+    )
+
+    stdout, stderr, status = Open3.capture3(
+      script.to_s,
+      "--sessions-dir",
+      dir,
+      "--all",
+      "--no-header"
+    )
+
+    expected = "2026-07-09\tmain\tcodex\tdemo\tfixture.jsonl\treview project check issues\n"
+    unless status.success? && stdout == expected
+      add_error(
+        "#{rel(script)} fixture failed: expected #{expected.inspect}, " \
+        "got stdout=#{stdout.inspect}, stderr=#{stderr.inspect}, exit=#{status.exitstatus}"
+      )
+    end
+  end
+end
+
+def validate_executable_files
+  path = ROOT.join("scripts/validate-skills")
+  add_error("#{rel(path)} must be executable") unless File.executable?(path)
+end
+
+Dir.glob(ROOT.join("skills/*")).select { |path| File.directory?(path) }.sort.each do |skill_dir|
+  validate_skill(skill_dir)
+end
+
+validate_agent_yaml
+validate_github_workflows
+validate_markdown_links
+validate_shell_scripts
+validate_workflow_inventory_fixture
+validate_executable_files
+
+if ERRORS.empty?
+  puts "validate-skills: ok"
+else
+  warn "validate-skills failed:"
+  ERRORS.each { |message| warn "- #{message}" }
+  exit 1
+end

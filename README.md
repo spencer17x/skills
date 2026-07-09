@@ -17,11 +17,12 @@ skills/
     references/  # optional
     scripts/     # optional
     assets/      # optional
+    agents/      # optional
 ```
 
-Only create `references/`, `scripts/`, or `assets/` when the skill actually
-needs them. Do not create category folders under `skills/` by default; keep all
-skills directly under `skills/<skill-name>/`.
+Only create `references/`, `scripts/`, `assets/`, or `agents/` when the skill
+actually needs them. Do not create category folders under `skills/` by default;
+keep all skills directly under `skills/<skill-name>/`.
 
 ## Available Skills
 
@@ -41,8 +42,33 @@ skills directly under `skills/<skill-name>/`.
 - Put detailed reference material in a skill's `references/` folder.
 - Put deterministic helper scripts in a skill's `scripts/` folder.
 - Put templates or reusable output files in a skill's `assets/` folder.
+- Put agent-specific metadata or prompts in a skill's `agents/` folder.
 - Do not add MCP servers here unless they are private implementation details of
   a specific skill.
 
 See [`docs/skill-conventions.md`](docs/skill-conventions.md) for the working
 rules for adding and updating skills.
+
+## Installation
+
+Use CLI-first installation instructions from
+[`docs/quick-install.md`](docs/quick-install.md). Manual copy and symlink
+commands are documented there as fallback paths for agents without a registry or
+installer.
+
+## Versioning
+
+Track source changes in [`CHANGELOG.md`](CHANGELOG.md). Use Git tags or commit
+SHAs to pin installs. Do not add hand-maintained version fields to source
+`SKILL.md` frontmatter.
+
+## Validation
+
+Run the repository validator after changing skills, agent metadata, scripts, or
+Markdown links:
+
+```bash
+scripts/validate-skills
+```
+
+GitHub Actions runs the same validation on pull requests and pushes to `main`.

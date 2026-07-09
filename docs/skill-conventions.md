@@ -14,6 +14,7 @@ skills/
     references/  # optional
     scripts/     # optional
     assets/      # optional
+    agents/      # optional
 scripts/
 ```
 
@@ -36,10 +37,11 @@ skills/skill-name/
   references/  # optional
   scripts/     # optional
   assets/      # optional
+  agents/      # optional
 ```
 
-Only create `references/`, `scripts/`, or `assets/` when the skill actually
-needs them.
+Only create `references/`, `scripts/`, `assets/`, or `agents/` when the skill
+actually needs them.
 
 ## Naming
 
@@ -65,6 +67,31 @@ needs them.
   before loading the full skill body.
 - Keep the body concise and procedural.
 - Move large schemas, examples, policies, or style guides into `references/`.
+- Do not add hand-maintained version fields to source `SKILL.md` frontmatter.
+  Use Git tags and `CHANGELOG.md` for source versioning.
+- If an external installer writes provenance metadata into installed skill
+  frontmatter, do not copy that generated metadata back into source skills unless
+  this convention is intentionally updated.
+
+## Agent Metadata
+
+Use `agents/` only for agent-specific metadata, prompts, UI hints, or adapter
+files that are not part of the portable `SKILL.md` contract.
+
+Examples:
+
+- `agents/openai.yaml`
+- `agents/claude.yaml`
+
+Keep agent metadata in the same primary language as the skill.
+
+## Installation Docs
+
+- Prefer CLI-first install instructions.
+- Keep manual copy and symlink commands as fallback or local-development paths.
+- Include verify, update, uninstall, and version pinning notes when install
+  behavior changes.
+- Do not document unconfirmed agent commands.
 
 ## MCP Boundary
 
@@ -74,3 +101,12 @@ or tests.
 
 Small deterministic helpers that support one skill can live under that skill's
 `scripts/` directory.
+
+## Validation
+
+Run the repository validator after changing skills, metadata, scripts, or
+Markdown links:
+
+```bash
+scripts/validate-skills
+```

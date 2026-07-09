@@ -76,7 +76,7 @@ if [[ "$all" != true ]]; then
   find_args+=(-mtime "-$days")
 fi
 
-find "${find_args[@]}" -print0 |
+find "${find_args[@]}" -print0 | sort -z |
   while IFS= read -r -d '' session_file; do
     jq -s -r '
       def clean:

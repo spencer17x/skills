@@ -1,0 +1,29 @@
+name: Validate Skills
+
+'on':
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Check validator syntax
+        run: ruby -c scripts/validate-skills
+
+      - name: Validate skills
+        run: scripts/validate-skills
+
+      - name: Check whitespace errors
+        run: git diff --check
