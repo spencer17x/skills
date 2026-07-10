@@ -109,4 +109,5 @@ Markdown links:
 
 ```bash
 scripts/validate-skills
+scripts/test-validate-skills
 ```

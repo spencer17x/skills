@@ -2,7 +2,7 @@
 
 Use this generic, fictional reference when rewriting AI Agent, AI application, RAG, or LLM workflow project experience.
 
-Do not encode a specific user's personal projects, employers, repositories, metrics, or domain background into this example. Replace the scenario, stack, and metrics with the user's real evidence during resume optimization.
+Do not encode a specific user's personal projects, employers, repositories, metrics, or domain background into this example. Replace the scenario, stack, implementation details, and outcomes only with verified user evidence during resume optimization.
 
 ## Scenario
 
@@ -12,7 +12,7 @@ The user provides rough notes such as:
 I built an intelligent customer-support Agent with LangChain, LangGraph, and RAG. It connects to an internal knowledge base to answer user questions, uses tool calling to query after-sales tickets, stores conversation history in Redis, and includes prompt optimization.
 ```
 
-The goal is to turn vague notes into resume-ready bullets with ownership, technical depth, reliability thinking, and results.
+The goal is to improve the wording without adding ownership, architecture, reliability, validation, or outcome claims that the notes do not support.
 
 ## Weak Version
 
@@ -33,42 +33,31 @@ Understands vector databases, embeddings, and Redis session storage.
 - No result or validation.
 - Sounds like a demo or tutorial project.
 
-## Better Version
+## Evidence-Backed Version
 
 ```text
-Owned the core workflow design and development for an intelligent customer-support Agent covering pre-sales questions, product FAQs, and after-sales ticket queries, building a multi-turn Q&A system based on RAG and tool calling.
-Designed an Agent workflow that decomposed user requests into intent detection, knowledge-base retrieval, tool routing, result validation, and answer synthesis stages, improving controllability and maintainability of Agent behavior.
-Built the knowledge-base RAG pipeline by cleaning product documents, FAQs, and operating rules; implementing chunking, embedding, and vector retrieval; and returning source citations to reduce hallucination risk.
-Designed the ticket-query tool schema and invocation flow, enabling the Agent to call after-sales ticket APIs based on user intent and adding retries, graceful degradation, and fallback replies for timeouts, missing parameters, and permission failures.
-Implemented multi-turn conversation state management and session persistence with Redis, including summary compression for long conversations to reduce context token usage while preserving key context.
-Created reusable customer-support Agent prompt templates, tool-failure handling strategies, and question-classification rules to support internal testing and business-scenario validation.
+Built an intelligent customer-support Agent with LangChain and LangGraph, combining knowledge-base RAG with tool calling for after-sales ticket queries.
+Connected the Agent to an internal knowledge base to answer user questions through RAG.
+Integrated tool calling for after-sales ticket lookup.
+Stored conversation history in Redis and optimized prompts for the Agent workflow.
 ```
 
-## Strong Version With Real Metrics
+This version does not claim workflow design, retrieval stages, citations, retries, summary compression, production use, or results because the source notes do not provide them.
 
-Only use this level of specificity when the user has provided real metrics. The placeholders below must be replaced with verified user evidence.
+## Stronger Draft After Verification
+
+Use this structure only after the user verifies every bracketed field. Until then, it is a draft and must not be exported as a final resume.
 
 ```text
-Owned the core workflow design and launch of an intelligent customer-support Agent for pre-sales questions, product FAQs, and after-sales ticket queries, building a multi-turn Q&A system based on RAG and tool calling that supported [add verified daily conversation volume] user conversations per day.
-Designed an Agent workflow that decomposed user requests into intent detection, knowledge-base retrieval, tool routing, result validation, and answer synthesis stages, upgrading complex support cases from single-turn Q&A into a controllable multi-step handling flow.
-Built the knowledge-base RAG pipeline for [add verified document scale] product documents, including cleaning, chunking, embedding, vector retrieval, source citation, result validation, and fallback replies, improving high-frequency question accuracy by [add verified improvement].
-Designed the ticket-query tool schema and invocation flow, enabling the Agent to call after-sales ticket APIs based on user intent and adding retries, graceful degradation, and fallback replies for timeouts, missing parameters, and permission failures.
-Implemented multi-turn conversation state management and session persistence with Redis, triggering summary compression after [add turn count] turns and reducing per-inference context token usage from [before] to [after].
-After launch, reduced human handoff rate from [before] to [after] and improved average support response latency from [before] to [after], reducing support workload and user waiting time.
+[Owned/implemented] an intelligent customer-support Agent for [verified support scope] using LangChain, LangGraph, RAG, and tool calling; the project reached [verified demo/POC/production state].
+Built the knowledge-base workflow for [verified data sources and scale], implementing [verified retrieval stages] and achieving [verified evaluation result].
+Implemented ticket-query tool calling with [verified schema, validation, permission, retry, or fallback behavior], achieving [verified tool result].
+Implemented Redis-backed conversation storage with [verified session, retention, or compression behavior], changing [verified latency, token, or continuity result].
 ```
 
 ## If Metrics Are Missing
 
-Do not fabricate numbers. Use truthful qualitative results or placeholders.
-
-```text
-Owned the core workflow design and development for an intelligent customer-support Agent covering pre-sales questions, product FAQs, and after-sales ticket queries, building a multi-turn Q&A system based on RAG and tool calling and completing internal proof-of-concept validation.
-Designed an Agent workflow that decomposed user requests into intent detection, knowledge-base retrieval, tool routing, result validation, and answer synthesis stages, improving controllability and maintainability of Agent behavior.
-Built the knowledge-base RAG pipeline by cleaning product documents, FAQs, and operating rules; implementing chunking, embedding, and vector retrieval; and returning source citations to reduce hallucination risk.
-Designed the ticket-query tool schema and invocation flow, enabling the Agent to call after-sales ticket APIs based on user intent and adding retries, graceful degradation, and fallback replies for timeouts, missing parameters, and permission failures.
-Implemented multi-turn conversation state management and session persistence with Redis, including summary compression for long conversations to reduce context token usage while preserving key context.
-Created reusable customer-support Agent prompt templates, tool-failure handling strategies, and question-classification rules to support future production integration.
-```
+Do not replace missing metrics with unverified qualitative outcomes. Use the evidence-backed version, omit the result clause, and ask for the most valuable missing evidence when questions are allowed.
 
 ## Experience Mining Questions
 
@@ -195,6 +184,8 @@ Mention these only when true.
 
 ## Bad to Good Transformations
 
+Each evidence-backed rewrite preserves only the facts in its weak input. The stronger draft may be used only after every bracketed field is verified.
+
 ### RAG
 
 Bad:
@@ -203,16 +194,16 @@ Bad:
 Familiar with RAG and built a knowledge-base Q&A system.
 ```
 
-Good:
+Evidence-backed:
 
 ```text
-Owned the enterprise knowledge-base RAG Q&A pipeline, cleaned and chunked product documents, implemented embeddings and vector retrieval, and added source citations, result validation, and fallback replies to reduce hallucination risk.
+Built a knowledge-base Q&A system with RAG.
 ```
 
-Strong:
+Stronger draft after verification:
 
 ```text
-Owned the enterprise knowledge-base RAG Q&A pipeline for [add verified document scale] product documents, added source citations, result validation, and fallback replies, and improved high-frequency question accuracy by [add verified metric].
+[Owned/implemented] a knowledge-base RAG Q&A pipeline for [verified document scale], implemented [verified retrieval and reliability stages], and achieved [verified evaluation result].
 ```
 
 ### Tool Calling
@@ -223,10 +214,16 @@ Bad:
 Integrated tool calling to query tickets.
 ```
 
-Good:
+Evidence-backed:
 
 ```text
-Designed the ticket-query tool schema and invocation flow, enabling the Agent to call after-sales ticket APIs based on user intent and adding retries, graceful degradation, and fallback replies for missing parameters, API timeouts, and permission failures.
+Integrated tool calling for ticket queries.
+```
+
+Stronger draft after verification:
+
+```text
+[Designed/implemented] ticket-query tool calling with [verified schema, validation, permission, retry, or fallback behavior], achieving [verified result].
 ```
 
 ### Memory
@@ -237,10 +234,16 @@ Bad:
 Used Redis to store conversation history.
 ```
 
-Good:
+Evidence-backed:
 
 ```text
-Implemented multi-turn conversation state management and session persistence with Redis, and added summary compression for long conversations to reduce context token usage while preserving continuity.
+Stored conversation history in Redis.
+```
+
+Stronger draft after verification:
+
+```text
+Implemented Redis-backed conversation storage with [verified session, retention, or compression behavior], changing [verified latency, token, or continuity result].
 ```
 
 ### Agent Workflow
@@ -251,10 +254,16 @@ Bad:
 Built an Agent flow.
 ```
 
-Good:
+Evidence-backed:
 
 ```text
-Designed a multi-stage Agent workflow that decomposed user questions into intent detection, knowledge-base retrieval, tool routing, result validation, and answer synthesis stages, improving controllability and maintainability for complex question handling.
+Built an Agent workflow.
+```
+
+Stronger draft after verification:
+
+```text
+[Designed/implemented] an Agent workflow with [verified stages], solving [verified problem] and achieving [verified result].
 ```
 
 ### Production
@@ -265,16 +274,16 @@ Bad:
 The project was completed.
 ```
 
-Good:
+Evidence-backed:
 
 ```text
-Completed internal proof-of-concept validation and integrated the Agent into a support testing environment covering product FAQs, after-sales ticket queries, and human handoff.
+Completed the Agent project.
 ```
 
-Strong:
+Stronger draft after verification:
 
 ```text
-After launch, supported [add verified daily conversation volume] user conversations per day, reduced human handoff rate from [before] to [after], and improved average support response latency from [before] to [after].
+Reached [verified demo/POC/production state] for [verified scope], achieving [verified adoption, quality, latency, cost, or workload result].
 ```
 
 ## Interview Risk Notes

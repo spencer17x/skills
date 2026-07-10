@@ -14,8 +14,9 @@ it. Use `main` only when you intentionally want the latest source state.
 Examples:
 
 ```bash
-gh skill install spencer17x/skills workflow-insights@<tag-or-sha>
-gh skill install spencer17x/skills workflow-insights --pin <tag-or-sha>
+TAG_OR_SHA=your-tag-or-commit-sha
+gh skill install spencer17x/skills "workflow-insights@$TAG_OR_SHA"
+gh skill install spencer17x/skills workflow-insights --pin "$TAG_OR_SHA"
 ```
 
 For tools that install from a GitHub directory URL, replace `main` with a tag or
@@ -55,6 +56,17 @@ gh skill update workflow-insights
 gh skill update --all
 ```
 
+Pinned skills are intentionally skipped by `gh skill update`. To move a skill
+to a new pinned version, reinstall it with `--force --pin`; this overwrites the
+installed skill files, so back up local changes first. To return to normal
+updates, clear the pin explicitly:
+
+```bash
+NEW_TAG_OR_SHA=your-new-tag-or-commit-sha
+gh skill install spencer17x/skills workflow-insights --force --pin "$NEW_TAG_OR_SHA"
+gh skill update workflow-insights --unpin
+```
+
 ## Codex
 
 Inside Codex, use the built-in skill installer with a GitHub directory URL:
@@ -70,7 +82,8 @@ $skill-installer install https://github.com/spencer17x/skills/tree/main/skills/f
 $skill-installer install https://github.com/spencer17x/skills/tree/main/skills/resume
 ```
 
-Restart Codex after installing new skills so the metadata is loaded.
+The installed skill is available on the next turn. Restart Codex only if it is
+not discovered there.
 
 ## Claude Code
 
@@ -80,9 +93,12 @@ Until it is, install skills with the supported local skills directories.
 User-wide install:
 
 ```bash
+set -euo pipefail
 mkdir -p ~/.claude/skills
-git clone https://github.com/spencer17x/skills.git /tmp/spencer17x-skills
-cp -R /tmp/spencer17x-skills/skills/workflow-insights ~/.claude/skills/
+checkout_dir="$(mktemp -d)"
+trap 'rm -rf "$checkout_dir"' EXIT
+git clone --depth 1 https://github.com/spencer17x/skills.git "$checkout_dir/repo"
+cp -R "$checkout_dir/repo/skills/workflow-insights" ~/.claude/skills/
 ```
 
 Project install:
@@ -122,8 +138,8 @@ cp -R skills/workflow-insights ~/.claude/skills/
 VS Code / GitHub Copilot project scope:
 
 ```bash
-mkdir -p .github/skills
-cp -R skills/workflow-insights .github/skills/
+mkdir -p .agents/skills
+cp -R skills/workflow-insights .agents/skills/
 ```
 
 For local development, symlink from this checkout so edits are picked up without
@@ -140,6 +156,7 @@ Check that the installed skill has a readable `SKILL.md`:
 ```bash
 head -20 "${CODEX_HOME:-$HOME/.codex}/skills/workflow-insights/SKILL.md"
 head -20 ~/.claude/skills/workflow-insights/SKILL.md
+head -20 .agents/skills/workflow-insights/SKILL.md
 ```
 
 In a new agent session, mention the skill name or describe a matching task. The
@@ -152,7 +169,8 @@ Remove the installed skill directory:
 ```bash
 rm -rf "${CODEX_HOME:-$HOME/.codex}/skills/workflow-insights"
 rm -rf ~/.claude/skills/workflow-insights
-rm -rf .github/skills/workflow-insights
+rm -rf .agents/skills/workflow-insights
+rm -rf .github/skills/workflow-insights  # legacy Copilot path from older docs
 ```
 
 Restart the agent after uninstalling if it caches skill metadata.

@@ -142,6 +142,8 @@ Never fabricate metrics.
 
 ## Rewrite Examples
 
+The evidence-backed rewrites below preserve only facts stated in each weak input. Add ownership, modules, technical changes, scale, or outcomes only after the user verifies them.
+
 ### Weak technology listing
 
 Bad:
@@ -153,7 +155,7 @@ Familiar with React, Vue, and TypeScript; participated in admin system developme
 Good:
 
 ```text
-Owned core pages for an internal configuration system, implementing configuration management, data search, and permission-control modules with Vue 3 and TypeScript, and extracted reusable form, table, and modal components to speed up delivery of future business pages.
+Contributed to admin system development. Familiar with React, Vue, and TypeScript.
 ```
 
 ### Weak project ownership
@@ -167,7 +169,7 @@ Participated in approval system development and handled some API integration.
 Good:
 
 ```text
-Owned the approval list and detail modules, designed front-end interactions for approval-state transitions, exceptional states, and user feedback, and aligned API contracts with backend engineers to deliver the core approval workflow reliably.
+Contributed to approval system development and integrated APIs.
 ```
 
 ### Weak performance description
@@ -181,7 +183,7 @@ Optimized page performance and improved user experience.
 Good:
 
 ```text
-Refactored state updates and split high-frequency rendering components for large data-table filtering and batch operations, reducing unnecessary rerenders and improving core interaction responsiveness by [add verified percentage].
+Improved page performance and user experience.
 ```
 
 ### Weak AI project description
@@ -195,7 +197,7 @@ Familiar with RAG and built a knowledge-base Q&A system.
 Good:
 
 ```text
-Designed and implemented a knowledge-base Q&A pipeline covering document chunking, embedding, retrieval, answer synthesis, source citation, result validation, and fallback handling to improve answer trustworthiness and reduce hallucination risk.
+Built a knowledge-base Q&A system with RAG.
 ```
 
 ### Weak backend description
@@ -209,7 +211,13 @@ Responsible for API development and system maintenance.
 Good:
 
 ```text
-Designed and optimized core business APIs for high-concurrency query scenarios, introduced caching and pagination to reduce database pressure, and improved production troubleshooting through structured logging, monitoring, and alerting.
+Developed APIs and maintained the system.
+```
+
+When stronger detail is needed, keep the output as a draft until the candidate verifies the missing fields:
+
+```text
+[Owned/contributed to] [verified scope], implemented [verified technical changes] to solve [verified problem], resulting in [verified outcome].
 ```
 
 ## Role Translation Rules

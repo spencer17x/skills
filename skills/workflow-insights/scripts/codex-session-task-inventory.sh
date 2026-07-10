@@ -88,6 +88,10 @@ find "${find_args[@]}" -print0 | sort -z |
         startswith("<environment_context>")
         or startswith("<skill>")
         or startswith("<permissions")
+        or startswith("<recommended_plugins>")
+        or startswith("<skills_instructions>")
+        or startswith("<apps_instructions>")
+        or startswith("<plugins_instructions>")
         or startswith("# AGENTS.md instructions")
         or startswith("<turn_aborted>");
 

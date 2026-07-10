@@ -69,6 +69,8 @@ Markdown links:
 
 ```bash
 scripts/validate-skills
+scripts/test-validate-skills
 ```
 
-GitHub Actions runs the same validation on pull requests and pushes to `main`.
+GitHub Actions runs the same validation and regression test on pull requests and
+pushes to `main`.

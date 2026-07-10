@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "fileutils"
+require "open3"
+require "pathname"
+require "tmpdir"
+
+ROOT = Pathname.new(__dir__).join("..").realpath
+
+Dir.mktmpdir("validate-skills-test") do |dir|
+  fixture_root = Pathname.new(dir).join("repo")
+  fixture_root.mkpath
+
+  %w[.github docs scripts skills].each do |entry|
+    FileUtils.cp_r(ROOT.join(entry), fixture_root.join(entry))
+  end
+  %w[AGENTS.md CHANGELOG.md README.md].each do |entry|
+    FileUtils.cp(ROOT.join(entry), fixture_root.join(entry))
+  end
+
+  invalid_skill = fixture_root.join("skills/123")
+  invalid_skill.mkpath
+  invalid_skill.join("SKILL.md").write(<<~MARKDOWN)
+    ---
+    name: 123
+    description: [wrong, shape]
+    ---
+
+    # Invalid Fixture
+  MARKDOWN
+
+  stdout, stderr, status = Open3.capture3(
+    fixture_root.join("scripts/validate-skills").to_s,
+    chdir: fixture_root.to_s
+  )
+
+  expected_errors = [
+    "skills/123/SKILL.md: name must be a string",
+    "skills/123/SKILL.md: description must be a string"
+  ]
+  missing_errors = expected_errors.reject { |message| stderr.include?(message) }
+
+  next if !status.success? && missing_errors.empty?
+
+  warn "test-validate-skills failed: invalid frontmatter types were accepted"
+  warn "stdout=#{stdout.inspect}"
+  warn "stderr=#{stderr.inspect}"
+  warn "missing=#{missing_errors.inspect}"
+  exit 1
+end
+
+puts "test-validate-skills: ok"

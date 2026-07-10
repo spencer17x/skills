@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install jq
         run: |
@@ -20,10 +22,22 @@ jobs:
           sudo apt-get install -y jq
 
       - name: Check validator syntax
-        run: ruby -c scripts/validate-skills
+        run: |
+          ruby -c scripts/validate-skills
+          ruby -c scripts/test-validate-skills
 
       - name: Validate skills
         run: scripts/validate-skills
 
+      - name: Test validator regressions
+        run: scripts/test-validate-skills
+
       - name: Check whitespace errors
-        run: git diff --check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [[ "$BASE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+            BASE_SHA="$(git hash-object -t tree /dev/null)"
+          fi
+          git diff --check "$BASE_SHA" "$HEAD_SHA"

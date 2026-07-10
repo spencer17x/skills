@@ -24,3 +24,14 @@ frontmatter.
   metadata.
 - Made `workflow-insights` session inventory output deterministic by sorting
   session files before processing.
+
+### Fixed
+
+- Kept resume rewrites evidence-backed and prevented placeholder-bearing drafts
+  from being labeled final or export-ready.
+- Hardened skill installation examples, documented pinned update behavior, and
+  aligned GitHub Copilot project paths with `.agents/skills`.
+- Rejected non-string skill frontmatter values and added a validator regression
+  test.
+- Skipped current Codex wrapper messages in workflow session inventories.
+- Checked committed whitespace ranges in CI instead of the clean checkout.

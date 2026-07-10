@@ -41,7 +41,7 @@ Accept any combination of:
 - Target roles or job descriptions.
 - Recruiter feedback, interview feedback, or desired resume direction.
 
-If the user has provided enough information, do not block progress with excessive questions. Make a best-effort rewrite and mark unknown details with English placeholders such as `[add concrete metric]`, `[add launch scope]`, or `[add verified user volume]`.
+If the user has provided enough information, do not block progress with excessive questions. Make a best-effort rewrite and mark unknown details with placeholders in the selected language, such as `[add concrete metric]`, `[add launch scope]`, or `[add verified user volume]`. Any deliverable that still contains placeholders is a draft, not a final or export-ready resume.
 
 ## Core Rules
 
@@ -58,7 +58,8 @@ If the user has provided enough information, do not block progress with excessiv
 3. Prefer shipped, validated, or observable outcomes.
    - Use real metrics when available.
    - Use honest qualitative impact when metrics are missing.
-   - Never fabricate metrics, scale, titles, dates, production usage, or ownership.
+   - Never fabricate metrics, scale, titles, dates, employers, production usage, ownership, design decisions, implementation details, reliability mechanisms, or outcomes.
+   - Do not turn a likely implication into a stated fact. For example, Redis does not prove conversation continuity, and RAG does not prove grounded answers or reduced hallucination without user evidence.
 
 4. Tailor the resume to the target role or job description.
    - Put the most relevant skills and projects first.
@@ -135,6 +136,12 @@ Choose based on the user's request:
 For complete resume rewrites, default to a 2-page English PDF when the user does not specify output preferences.
 
 ## Final Quality Bar
+
+Before labeling any deliverable final or export-ready:
+
+1. Search for unresolved placeholders, bracketed prompts, invented names, inferred dates, and unverified metrics. None may remain.
+2. Trace every ownership, architecture, implementation, reliability, outcome, and impact claim to user-provided evidence.
+3. If required facts are still missing, deliver a clearly labeled draft plus a concise missing-information list. Do not describe it as final or export-ready.
 
 The optimized resume should make the reader think:
 

@@ -60,16 +60,20 @@ def validate_skill(skill_dir)
   add_error("#{rel(skill_file)}: missing frontmatter keys: #{missing.join(", ")}") unless missing.empty?
   add_error("#{rel(skill_file)}: unexpected frontmatter keys: #{extra.join(", ")}") unless extra.empty?
 
-  skill_name = metadata["name"].to_s
-  description = metadata["description"].to_s
+  skill_name = metadata["name"]
+  description = metadata["description"]
 
-  if skill_name != folder_name
+  if metadata.key?("name") && !skill_name.is_a?(String)
+    add_error("#{rel(skill_file)}: name must be a string")
+  elsif skill_name && skill_name != folder_name
     add_error("#{rel(skill_file)}: name #{skill_name.inspect} must match folder #{folder_name.inspect}")
   end
 
-  if description.strip.empty?
+  if metadata.key?("description") && !description.is_a?(String)
+    add_error("#{rel(skill_file)}: description must be a string")
+  elsif description&.strip&.empty?
     add_error("#{rel(skill_file)}: description must be non-empty")
-  elsif description.length > 1024
+  elsif description && description.length > 1024
     add_error("#{rel(skill_file)}: description must be 1024 characters or fewer")
   end
 end
@@ -171,6 +175,38 @@ def validate_workflow_inventory_fixture
           payload: {
             type: "message",
             role: "user",
+            content: [{ type: "input_text", text: "<recommended_plugins>ignored</recommended_plugins>" }]
+          }
+        },
+        {
+          type: "response_item",
+          payload: {
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "<skills_instructions>ignored</skills_instructions>" }]
+          }
+        },
+        {
+          type: "response_item",
+          payload: {
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "<apps_instructions>ignored</apps_instructions>" }]
+          }
+        },
+        {
+          type: "response_item",
+          payload: {
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "<plugins_instructions>ignored</plugins_instructions>" }]
+          }
+        },
+        {
+          type: "response_item",
+          payload: {
+            type: "message",
+            role: "user",
             content: [{ type: "input_text", text: "review project\ncheck issues" }]
           }
         }
@@ -196,8 +232,10 @@ def validate_workflow_inventory_fixture
 end
 
 def validate_executable_files
-  path = ROOT.join("scripts/validate-skills")
-  add_error("#{rel(path)} must be executable") unless File.executable?(path)
+  %w[scripts/validate-skills scripts/test-validate-skills].each do |relative_path|
+    path = ROOT.join(relative_path)
+    add_error("#{rel(path)} must be executable") unless File.executable?(path)
+  end
 end
 
 Dir.glob(ROOT.join("skills/*")).select { |path| File.directory?(path) }.sort.each do |skill_dir|
