@@ -21,16 +21,38 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq
 
-      - name: Check validator syntax
-        run: |
-          ruby -c scripts/validate-skills
-          ruby -c scripts/test-validate-skills
-
-      - name: Validate skills
+      - name: Validate repository
         run: scripts/validate-skills
 
-      - name: Test validator regressions
-        run: scripts/test-validate-skills
+      - name: Test validators
+        run: |
+          scripts/test-validate-skills
+          scripts/test-validate-commit-message
+
+      - name: Validate commit messages
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_TITLE: ${{ github.event.pull_request.title || '' }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            printf '%s\n' "$PR_TITLE" | scripts/validate-commit-message
+          fi
+
+          commit_list="$RUNNER_TEMP/commit-shas"
+          if [[ "$BASE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+            printf '%s\n' "$HEAD_SHA" > "$commit_list"
+          else
+            git rev-list --reverse --no-merges "$BASE_SHA..$HEAD_SHA" > "$commit_list"
+          fi
+
+          while IFS= read -r commit_sha; do
+            [[ -z "$commit_sha" ]] && continue
+            git show -s --format=%B "$commit_sha" | scripts/validate-commit-message
+          done < "$commit_list"
 
       - name: Check whitespace errors
         env:

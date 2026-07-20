@@ -43,11 +43,16 @@ keep all skills directly under `skills/<skill-name>/`.
 - Put deterministic helper scripts in a skill's `scripts/` folder.
 - Put templates or reusable output files in a skill's `assets/` folder.
 - Put agent-specific metadata or prompts in a skill's `agents/` folder.
-- Do not add MCP servers here unless they are private implementation details of
-  a specific skill.
+- Do not add standalone MCP servers here. Keep only small deterministic helpers
+  that directly support a specific skill.
 
 See [`docs/skill-conventions.md`](docs/skill-conventions.md) for the working
 rules for adding and updating skills.
+
+Repository governance and automation boundaries are described in
+[`AGENTS.md`](AGENTS.md) and
+[`docs/infrastructure.md`](docs/infrastructure.md). New commits follow
+[`docs/commit-conventions.md`](docs/commit-conventions.md).
 
 ## Installation
 
@@ -70,7 +75,9 @@ Markdown links:
 ```bash
 scripts/validate-skills
 scripts/test-validate-skills
+scripts/test-validate-commit-message
 ```
 
-GitHub Actions runs the same validation and regression test on pull requests and
-pushes to `main`.
+GitHub Actions runs the same validation and regression tests on pull requests
+and pushes to `main`. It also checks pull request titles and new non-merge commit
+messages.

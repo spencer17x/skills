@@ -12,7 +12,7 @@ Dir.mktmpdir("validate-skills-test") do |dir|
   fixture_root = Pathname.new(dir).join("repo")
   fixture_root.mkpath
 
-  %w[.github docs scripts skills].each do |entry|
+  %w[.github .githooks docs scripts skills].each do |entry|
     FileUtils.cp_r(ROOT.join(entry), fixture_root.join(entry))
   end
   %w[AGENTS.md CHANGELOG.md README.md].each do |entry|

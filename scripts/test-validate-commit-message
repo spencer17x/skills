@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "open3"
+require "pathname"
+require "tempfile"
+
+ROOT = Pathname.new(__dir__).join("..").realpath
+VALIDATOR = ROOT.join("scripts/validate-commit-message")
+HOOK = ROOT.join(".githooks/commit-msg")
+
+valid_messages = {
+  "feature with scope" => "feat(resume): add role-fit checklist\n",
+  "breaking change" => "feat(figma-ui)!: require source-frame selection\n",
+  "Chinese summary" => "docs: 补充技能安装验证说明\n",
+  "maximum header length" => "docs: #{"a" * 94}\n",
+  "body with separator" => "refactor(validation): simplify link checks\n\nKeep the same validation contract.\n",
+  "generated merge" => "Merge pull request #12 from example/branch\n"
+}
+
+invalid_messages = {
+  "empty message" => "",
+  "missing type" => "add resume skill\n",
+  "unknown type" => "feature: add resume skill\n",
+  "uppercase scope" => "feat(Resume): add scoring\n",
+  "missing summary" => "fix: \n",
+  "period at end of summary" => "fix: correct scoring.\n",
+  "missing body separator" => "docs(infra): explain boundaries\nBody starts immediately.\n",
+  "header too long" => "docs: #{"a" * 101}\n"
+}
+
+failures = []
+
+valid_messages.each do |label, message|
+  _, stderr, status = Open3.capture3(VALIDATOR.to_s, stdin_data: message, chdir: ROOT.to_s)
+  failures << "valid case #{label.inspect} failed: #{stderr.strip}" unless status.success?
+end
+
+invalid_messages.each do |label, message|
+  _, _, status = Open3.capture3(VALIDATOR.to_s, stdin_data: message, chdir: ROOT.to_s)
+  failures << "invalid case #{label.inspect} was accepted" if status.success?
+end
+
+Tempfile.create("commit-message") do |file|
+  file.write("ci(validation): test the local commit hook\n")
+  file.flush
+  _, stderr, status = Open3.capture3(HOOK.to_s, file.path, chdir: ROOT.to_s)
+  failures << "commit-msg hook failed: #{stderr.strip}" unless status.success?
+end
+
+if failures.empty?
+  puts "test-validate-commit-message: ok"
+else
+  warn "test-validate-commit-message failed:"
+  failures.each { |failure| warn "- #{failure}" }
+  exit 1
+end

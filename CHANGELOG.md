@@ -17,11 +17,17 @@ frontmatter.
 - Added repository validation script for skills, links, metadata, and shell
   helpers.
 - Added GitHub Actions validation for pull requests and pushes to `main`.
+- Added an infrastructure design covering repository boundaries, validation,
+  releases, dependencies, security, and future evolution.
+- Added Conventional Commit documentation, a dependency-free validator,
+  regression tests, an optional local `commit-msg` hook, and CI enforcement.
 
 ### Changed
 
 - Documented `agents/` as an optional skill subdirectory for agent-specific
   metadata.
+- Expanded `AGENTS.md` into the repository-wide working agreement for agent
+  workflow, change scope, Git policy, and verification.
 - Made `workflow-insights` session inventory output deterministic by sorting
   session files before processing.
 

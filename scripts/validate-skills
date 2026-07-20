@@ -132,9 +132,29 @@ def run_command(command, failure_label)
   add_error("#{failure_label}: #{output.empty? ? "exit #{status.exitstatus}" : output}")
 end
 
-def validate_shell_scripts
-  Dir.glob(ROOT.join("{scripts,skills/*/scripts}/**/*.sh")).sort.each do |path|
-    run_command(["bash", "-n", path], "#{rel(path)} failed bash syntax check")
+def maintenance_files
+  patterns = [
+    ".githooks/**/*",
+    "scripts/**/*",
+    "skills/*/scripts/**/*"
+  ]
+
+  patterns
+    .flat_map { |pattern| Dir.glob(ROOT.join(pattern)) }
+    .select { |path| File.file?(path) }
+    .uniq
+    .sort
+end
+
+def validate_script_syntax
+  maintenance_files.each do |path|
+    shebang = File.open(path, &:gets).to_s.strip
+    case shebang
+    when "#!/usr/bin/env bash", "#!/bin/bash"
+      run_command(["bash", "-n", path], "#{rel(path)} failed bash syntax check")
+    when "#!/usr/bin/env ruby", "#!/usr/bin/ruby"
+      run_command(["ruby", "-c", path], "#{rel(path)} failed Ruby syntax check")
+    end
   end
 end
 
@@ -232,7 +252,13 @@ def validate_workflow_inventory_fixture
 end
 
 def validate_executable_files
-  %w[scripts/validate-skills scripts/test-validate-skills].each do |relative_path|
+  %w[
+    .githooks/commit-msg
+    scripts/test-validate-commit-message
+    scripts/test-validate-skills
+    scripts/validate-commit-message
+    scripts/validate-skills
+  ].each do |relative_path|
     path = ROOT.join(relative_path)
     add_error("#{rel(path)} must be executable") unless File.executable?(path)
   end
@@ -245,7 +271,7 @@ end
 validate_agent_yaml
 validate_github_workflows
 validate_markdown_links
-validate_shell_scripts
+validate_script_syntax
 validate_workflow_inventory_fixture
 validate_executable_files
 
