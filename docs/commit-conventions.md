@@ -127,16 +127,17 @@ Run the validator regression suite after changing the policy implementation:
 scripts/test-validate-commit-message
 ```
 
-To enable validation for local commits in this checkout:
+To check prerequisites and enable validation for local commits in a fresh
+checkout:
 
 ```bash
-git config core.hooksPath .githooks
+scripts/bootstrap
 ```
 
-This replaces any existing `core.hooksPath` for the checkout; integrate the
-validator with an existing custom hook setup instead when needed. CI validates
-pull request titles and each new non-merge commit. The local hook is optional,
-but it provides earlier feedback with the same validator used by CI.
+The bootstrap command is idempotent and refuses to replace an existing custom
+hooks path. Integrate the validator with that setup manually when needed. CI
+validates pull request titles and each new non-merge commit. The local hook is
+optional, but it provides earlier feedback with the same validator used by CI.
 The validator enforces header structure, allowed type, scope shape, maximum
 length, terminal-period policy, and the blank line before a body. Reviewers are
 responsible for semantic guidance such as atomicity and body quality.

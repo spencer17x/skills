@@ -21,6 +21,8 @@ frontmatter.
   releases, dependencies, security, and future evolution.
 - Added Conventional Commit documentation, a dependency-free validator,
   regression tests, an optional local `commit-msg` hook, and CI enforcement.
+- Added an idempotent contributor bootstrap command with prerequisite checks,
+  safe Git hook configuration, custom-hook protection, and regression coverage.
 
 ### Changed
 

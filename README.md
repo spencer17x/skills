@@ -67,6 +67,19 @@ Track source changes in [`CHANGELOG.md`](CHANGELOG.md). Use Git tags or commit
 SHAs to pin installs. Do not add hand-maintained version fields to source
 `SKILL.md` frontmatter.
 
+## Contributor Setup
+
+Skill consumers do not need repository hooks. Contributors should run the
+idempotent bootstrap command once after cloning:
+
+```bash
+scripts/bootstrap
+```
+
+It checks the required Git, Ruby, Bash, and `jq` commands and configures the
+versioned `commit-msg` hook. If the checkout already uses a custom hooks path,
+the command exits without replacing it.
+
 ## Validation
 
 Run the repository validator after changing skills, agent metadata, scripts, or
@@ -74,6 +87,7 @@ Markdown links:
 
 ```bash
 scripts/validate-skills
+scripts/test-bootstrap
 scripts/test-validate-skills
 scripts/test-validate-commit-message
 ```

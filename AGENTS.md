@@ -105,6 +105,9 @@ Detailed authoring rules live in
 - Keep commits atomic and exclude unrelated formatting or cleanup.
 - Use the skill name as scope for skill-specific changes and an infrastructure
   area such as `infra`, `validation`, or `release` for repository-wide changes.
+- In a fresh contributor checkout, run `scripts/bootstrap` once before the first
+  commit. It checks prerequisites and enables the versioned Git hook without
+  replacing an existing custom hooks path.
 - Before handing off a requested commit, validate its message with
   `scripts/validate-commit-message`.
 
@@ -115,6 +118,7 @@ Run the checks that match the files changed:
 | Change | Required checks |
 | --- | --- |
 | Skill, docs, metadata, or repository policy | `scripts/validate-skills` |
+| Contributor bootstrap | `scripts/test-bootstrap` |
 | Skill validator | `scripts/test-validate-skills` |
 | Commit-message validator or hook | `scripts/test-validate-commit-message` |
 | Shell helper | `bash -n <script>` and a small happy-path fixture when practical |

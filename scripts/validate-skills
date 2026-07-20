@@ -254,6 +254,8 @@ end
 def validate_executable_files
   %w[
     .githooks/commit-msg
+    scripts/bootstrap
+    scripts/test-bootstrap
     scripts/test-validate-commit-message
     scripts/test-validate-skills
     scripts/validate-commit-message

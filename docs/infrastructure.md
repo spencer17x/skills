@@ -79,6 +79,7 @@ is intentionally small:
 
 ```bash
 scripts/validate-skills
+scripts/test-bootstrap
 scripts/test-validate-skills
 scripts/test-validate-commit-message
 git diff --check
@@ -86,8 +87,8 @@ git diff --check
 
 `scripts/validate-skills` checks skill shape and frontmatter, agent and workflow
 YAML, local Markdown links, maintenance-script syntax and executability, and
-small deterministic helper fixtures. The two test scripts protect validator
-behavior against regression.
+small deterministic helper fixtures. The test scripts protect bootstrap and
+validator behavior against regression.
 
 GitHub Actions is the remote enforcement layer. Pull requests and pushes to
 `main` run the same repository validation, validator tests, whitespace checks,
@@ -105,16 +106,18 @@ implementation of repository policy.
 [`docs/commit-conventions.md`](commit-conventions.md) defines the policy.
 `scripts/validate-commit-message` is its executable implementation.
 
-Developers may enable the repository-provided local hook with:
+Contributors should initialize a fresh checkout with:
 
 ```bash
-git config core.hooksPath .githooks
+scripts/bootstrap
 ```
 
-This writes checkout-local Git configuration. If the checkout already uses a
-custom hooks path, integrate the validator there instead of replacing it. The
-hook is optional developer ergonomics; CI remains authoritative. Existing
-history is not rewritten to satisfy newly introduced rules.
+The command checks local prerequisites, validates the hook entrypoint, and
+writes checkout-local Git configuration when no hooks path is already active.
+It is idempotent and refuses to override a custom local or global hooks path. In
+that case, integrate `.githooks/commit-msg` with the existing hook setup
+manually. The hook is optional developer ergonomics; CI remains authoritative.
+Existing history is not rewritten to satisfy newly introduced rules.
 
 ## Release and Distribution
 

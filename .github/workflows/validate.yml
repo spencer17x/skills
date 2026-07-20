@@ -24,8 +24,9 @@ jobs:
       - name: Validate repository
         run: scripts/validate-skills
 
-      - name: Test validators
+      - name: Test maintenance tooling
         run: |
+          scripts/test-bootstrap
           scripts/test-validate-skills
           scripts/test-validate-commit-message
 

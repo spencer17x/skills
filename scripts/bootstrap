@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'TEXT'
+Usage: scripts/bootstrap
+
+Check contributor prerequisites and configure the repository-provided Git hooks.
+TEXT
+}
+
+fail() {
+  printf 'bootstrap failed: %s\n' "$*" >&2
+  exit 1
+}
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  usage
+  exit 0
+fi
+
+if (( $# > 0 )); then
+  usage >&2
+  exit 2
+fi
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+repo_root="$(cd -- "$script_dir/.." && pwd -P)"
+
+required_commands=(git ruby bash jq)
+missing_commands=()
+for dependency in "${required_commands[@]}"; do
+  command -v "$dependency" >/dev/null 2>&1 || missing_commands+=("$dependency")
+done
+
+if (( ${#missing_commands[@]} > 0 )); then
+  fail "missing required commands: ${missing_commands[*]}"
+fi
+
+git_root_raw="$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null)" \
+  || fail "$repo_root is not a Git worktree"
+git_root="$(cd -- "$git_root_raw" && pwd -P)"
+[[ "$git_root" == "$repo_root" ]] \
+  || fail "script root $repo_root does not match Git root $git_root"
+
+required_executables=(
+  ".githooks/commit-msg"
+  "scripts/validate-commit-message"
+)
+for relative_path in "${required_executables[@]}"; do
+  [[ -x "$repo_root/$relative_path" ]] \
+    || fail "$relative_path is missing or not executable"
+done
+
+is_repo_hooks_path() {
+  case "$1" in
+    .githooks|./.githooks|"$repo_root/.githooks") return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+local_hooks_path="$(git -C "$repo_root" config --local --get core.hooksPath 2>/dev/null || true)"
+effective_hooks_path="$(git -C "$repo_root" config --get core.hooksPath 2>/dev/null || true)"
+
+if [[ -n "$local_hooks_path" ]] && ! is_repo_hooks_path "$local_hooks_path"; then
+  fail "refusing to replace local core.hooksPath=$local_hooks_path"
+fi
+
+if [[ -n "$effective_hooks_path" ]] && ! is_repo_hooks_path "$effective_hooks_path"; then
+  fail "refusing to override effective core.hooksPath=$effective_hooks_path"
+fi
+
+printf '%s\n' 'chore(infra): verify commit hook setup' \
+  | "$repo_root/scripts/validate-commit-message"
+
+if [[ -n "$effective_hooks_path" ]]; then
+  hook_status="already configured"
+else
+  git -C "$repo_root" config --local core.hooksPath .githooks
+  hook_status="configured"
+fi
+
+printf 'bootstrap: prerequisites ok (%s)\n' "${required_commands[*]}"
+printf 'bootstrap: %s core.hooksPath=%s\n' "$hook_status" \
+  "$(git -C "$repo_root" config --get core.hooksPath)"
+printf 'bootstrap: ok\n'

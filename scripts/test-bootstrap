@@ -1,0 +1,97 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "fileutils"
+require "open3"
+require "pathname"
+require "tmpdir"
+
+ROOT = Pathname.new(__dir__).join("..").realpath
+
+def capture(environment, *command, chdir:)
+  Open3.capture3(environment, *command.map(&:to_s), chdir: chdir.to_s)
+end
+
+failures = []
+
+Dir.mktmpdir("bootstrap-test") do |dir|
+  fixture_root = Pathname.new(dir).join("repo")
+  fixture_root.join("scripts").mkpath
+  fixture_root.join(".githooks").mkpath
+
+  %w[scripts/bootstrap scripts/validate-commit-message .githooks/commit-msg].each do |relative_path|
+    source = ROOT.join(relative_path)
+    destination = fixture_root.join(relative_path)
+    FileUtils.cp(source, destination, preserve: true)
+  end
+
+  global_config = Pathname.new(dir).join("global.gitconfig")
+  environment = {
+    "GIT_CONFIG_GLOBAL" => global_config.to_s,
+    "GIT_CONFIG_NOSYSTEM" => "1"
+  }
+
+  _, stderr, status = capture(environment, "git", "init", "--quiet", fixture_root, chdir: dir)
+  failures << "git fixture setup failed: #{stderr.strip}" unless status.success?
+
+  nested_dir = fixture_root.join("nested")
+  nested_dir.mkpath
+  bootstrap = fixture_root.join("scripts/bootstrap")
+
+  stdout, stderr, status = capture(environment, bootstrap, chdir: nested_dir)
+  unless status.success? && stdout.include?("bootstrap: configured core.hooksPath=.githooks")
+    failures << "first bootstrap run failed: stdout=#{stdout.inspect}, stderr=#{stderr.inspect}"
+  end
+
+  stdout, stderr, status = capture(environment, bootstrap, chdir: fixture_root)
+  unless status.success? && stdout.include?("bootstrap: already configured core.hooksPath=.githooks")
+    failures << "idempotent bootstrap run failed: stdout=#{stdout.inspect}, stderr=#{stderr.inspect}"
+  end
+
+  _, _, status = capture(
+    environment,
+    "git", "config", "--local", "core.hooksPath", ".custom-hooks",
+    chdir: fixture_root
+  )
+  failures << "custom hook fixture setup failed" unless status.success?
+
+  _, stderr, status = capture(environment, bootstrap, chdir: fixture_root)
+  unless !status.success? && stderr.include?("refusing to replace local core.hooksPath=.custom-hooks")
+    failures << "custom local hook path was not protected: stderr=#{stderr.inspect}"
+  end
+
+  stdout, _, status = capture(
+    environment,
+    "git", "config", "--local", "--get", "core.hooksPath",
+    chdir: fixture_root
+  )
+  failures << "custom local hook path changed" unless status.success? && stdout.strip == ".custom-hooks"
+
+  capture(environment, "git", "config", "--local", "--unset-all", "core.hooksPath", chdir: fixture_root)
+  _, _, status = capture(
+    environment,
+    "git", "config", "--file", global_config, "core.hooksPath", ".global-hooks",
+    chdir: fixture_root
+  )
+  failures << "custom global hook fixture setup failed" unless status.success?
+
+  _, stderr, status = capture(environment, bootstrap, chdir: fixture_root)
+  unless !status.success? && stderr.include?("refusing to override effective core.hooksPath=.global-hooks")
+    failures << "custom effective hook path was not protected: stderr=#{stderr.inspect}"
+  end
+
+  stdout, _, status = capture(
+    environment,
+    "git", "config", "--local", "--get", "core.hooksPath",
+    chdir: fixture_root
+  )
+  failures << "global hook protection wrote local config" if status.success? || !stdout.empty?
+end
+
+if failures.empty?
+  puts "test-bootstrap: ok"
+else
+  warn "test-bootstrap failed:"
+  failures.each { |failure| warn "- #{failure}" }
+  exit 1
+end
