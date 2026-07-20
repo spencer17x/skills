@@ -27,7 +27,7 @@ fi
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd -- "$script_dir/.." && pwd -P)"
 
-required_commands=(git ruby bash jq)
+required_commands=(git ruby bash jq sort tar)
 missing_commands=()
 for dependency in "${required_commands[@]}"; do
   command -v "$dependency" >/dev/null 2>&1 || missing_commands+=("$dependency")
@@ -44,8 +44,14 @@ git_root="$(cd -- "$git_root_raw" && pwd -P)"
   || fail "script root $repo_root does not match Git root $git_root"
 
 required_executables=(
+  ".githooks/pre-commit"
   ".githooks/commit-msg"
+  ".githooks/pre-push"
+  "scripts/check"
+  "scripts/validate-staged"
   "scripts/validate-commit-message"
+  "scripts/validate-push"
+  "scripts/validate-pushed-commits"
 )
 for relative_path in "${required_executables[@]}"; do
   [[ -x "$repo_root/$relative_path" ]] \
@@ -72,6 +78,10 @@ fi
 
 printf '%s\n' 'chore(infra): verify commit hook setup' \
   | "$repo_root/scripts/validate-commit-message"
+"$repo_root/scripts/check" --help >/dev/null
+"$repo_root/scripts/validate-staged" --help >/dev/null
+"$repo_root/scripts/validate-push" --help >/dev/null
+"$repo_root/scripts/validate-pushed-commits" --help >/dev/null
 
 if [[ -n "$effective_hooks_path" ]]; then
   hook_status="already configured"

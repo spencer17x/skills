@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'TEXT'
+Usage: scripts/validate-staged
+
+Validate whitespace and repository policy against the exact staged snapshot.
+Unstaged working-tree changes are intentionally ignored.
+TEXT
+}
+
+fail() {
+  printf 'validate-staged failed: %s\n' "$*" >&2
+  exit 1
+}
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  usage
+  exit 0
+fi
+
+if (( $# > 0 )); then
+  usage >&2
+  exit 2
+fi
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+repo_root="$(cd -- "$script_dir/.." && pwd -P)"
+git_root_raw="$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null)" \
+  || fail "$repo_root is not a Git worktree"
+git_root="$(cd -- "$git_root_raw" && pwd -P)"
+[[ "$git_root" == "$repo_root" ]] \
+  || fail "script root $repo_root does not match Git root $git_root"
+
+git -C "$repo_root" diff --cached --check
+
+snapshot_dir="$(mktemp -d "${TMPDIR:-/tmp}/skills-staged.XXXXXX")"
+cleanup() {
+  rm -rf -- "$snapshot_dir"
+}
+trap cleanup EXIT HUP INT TERM
+
+git -C "$repo_root" checkout-index --all --prefix="$snapshot_dir/" \
+  || fail "cannot materialize the staged snapshot"
+
+validator="$snapshot_dir/scripts/validate-skills"
+[[ -x "$validator" ]] \
+  || fail "staged snapshot is missing executable scripts/validate-skills"
+
+"$validator"
+printf 'validate-staged: ok\n'

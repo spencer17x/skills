@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'TEXT'
+Usage: scripts/validate-push <remote-name> <remote-url>
+
+Validate outgoing commit policy, then run the repository check suite against
+the exact committed snapshot at every unique ref tip being pushed.
+TEXT
+}
+
+fail() {
+  printf 'validate-push failed: %s\n' "$*" >&2
+  exit 1
+}
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  usage
+  exit 0
+fi
+
+if (( $# != 2 )); then
+  usage >&2
+  exit 2
+fi
+
+remote_name="$1"
+remote_url="$2"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+repo_root="$(cd -- "$script_dir/.." && pwd -P)"
+
+for dependency in git sort tar; do
+  command -v "$dependency" >/dev/null 2>&1 \
+    || fail "missing required command: $dependency"
+done
+
+temporary_dir="$(mktemp -d "${TMPDIR:-/tmp}/skills-pre-push.XXXXXX")"
+cleanup() {
+  rm -rf -- "$temporary_dir"
+}
+trap cleanup EXIT HUP INT TERM
+
+updates_file="$temporary_dir/updates"
+tips_file="$temporary_dir/tips"
+while IFS= read -r update; do
+  printf '%s\n' "$update"
+done > "$updates_file"
+: > "$tips_file"
+
+"$script_dir/validate-pushed-commits" "$remote_name" "$remote_url" \
+  < "$updates_file"
+
+while read -r local_ref local_oid remote_ref remote_oid; do
+  [[ -n "${local_ref:-}" ]] || continue
+  [[ "$local_oid" =~ ^0+$ ]] && continue
+
+  local_commit="$(git -C "$repo_root" rev-parse --verify "${local_oid}^{commit}" 2>/dev/null)" \
+    || continue
+  printf '%s\n' "$local_commit" >> "$tips_file"
+done < "$updates_file"
+
+LC_ALL=C sort -u "$tips_file" -o "$tips_file"
+
+tip_count=0
+while IFS= read -r tip_oid; do
+  [[ -n "$tip_oid" ]] || continue
+  tip_count=$((tip_count + 1))
+  snapshot_dir="$temporary_dir/snapshot-$tip_count"
+  mkdir -p -- "$snapshot_dir"
+
+  git -C "$repo_root" archive --format=tar "$tip_oid" \
+    | tar -xf - -C "$snapshot_dir"
+
+  checker="$snapshot_dir/scripts/check"
+  [[ -x "$checker" ]] \
+    || fail "$tip_oid is missing executable scripts/check"
+
+  printf 'validate-push: checking snapshot %.12s\n' "$tip_oid"
+  SKILLS_PRE_PUSH_ACTIVE=1 "$checker"
+done < "$tips_file"
+
+snapshot_suffix="s"
+if [[ "$tip_count" == "1" ]]; then
+  snapshot_suffix=""
+fi
+printf 'validate-push: ok (%d snapshot%s)\n' \
+  "$tip_count" "$snapshot_suffix"

@@ -1,0 +1,157 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "fileutils"
+require "open3"
+require "pathname"
+require "tmpdir"
+
+ROOT = Pathname.new(__dir__).join("..").realpath
+ZERO_OID = "0" * 40
+
+def capture(*command, chdir:, stdin_data: "")
+  Open3.capture3(*command.map(&:to_s), chdir: chdir.to_s, stdin_data: stdin_data)
+end
+
+def git(*arguments, chdir:)
+  capture("git", *arguments, chdir: chdir)
+end
+
+def commit(repo, message)
+  _stdout, stderr, status = git("commit", "--quiet", "--allow-empty", "-m", message, chdir: repo)
+  raise "commit failed: #{stderr.strip}" unless status.success?
+
+  stdout, = git("rev-parse", "HEAD", chdir: repo)
+  stdout.strip
+end
+
+failures = []
+
+Dir.mktmpdir("validate-pushed-commits-test") do |dir|
+  fixture_root = Pathname.new(dir).join("repo")
+  fixture_root.join("scripts").mkpath
+  fixture_root.join(".githooks").mkpath
+
+  %w[
+    scripts/validate-commit-message
+    scripts/validate-push
+    scripts/validate-pushed-commits
+    .githooks/pre-push
+  ].each do |relative_path|
+    FileUtils.cp(ROOT.join(relative_path), fixture_root.join(relative_path), preserve: true)
+  end
+
+  _stdout, stderr, status = git("init", "--quiet", "--initial-branch=main", fixture_root, chdir: dir)
+  raise "git fixture setup failed: #{stderr.strip}" unless status.success?
+
+  git("config", "user.name", "Fixture User", chdir: fixture_root)
+  git("config", "user.email", "fixture@example.com", chdir: fixture_root)
+
+  fixture_root.join("scripts/check").write(<<~BASH)
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+    read -r marker < "$script_dir/../marker.txt"
+    [[ "$marker" == "committed" ]]
+    printf 'fixture snapshot check: ok\n'
+  BASH
+  FileUtils.chmod(0o755, fixture_root.join("scripts/check"))
+  fixture_root.join("marker.txt").write("committed\n")
+  git("add", ".", chdir: fixture_root)
+
+  legacy_oid = commit(fixture_root, "legacy commit predating the policy")
+  valid_oid = commit(fixture_root, "feat(validation): reject invalid outgoing commits")
+  invalid_oid = commit(fixture_root, "invalid outgoing commit")
+
+  git("checkout", "--quiet", "--detach", valid_oid, chdir: fixture_root)
+  fixture_root.join("whitespace.txt").write("invalid whitespace  \n")
+  git("add", "whitespace.txt", chdir: fixture_root)
+  whitespace_oid = commit(fixture_root, "test(validation): detect outgoing whitespace")
+  fixture_root.join("marker.txt").write("dirty working tree\n")
+
+  validator = fixture_root.join("scripts/validate-pushed-commits")
+  hook = fixture_root.join(".githooks/pre-push")
+
+  valid_update = "refs/heads/main #{valid_oid} refs/heads/main #{legacy_oid}\n"
+  stdout, stderr, status = capture(
+    validator,
+    "origin",
+    "git@example.test:owner/repo.git",
+    chdir: fixture_root,
+    stdin_data: valid_update
+  )
+  unless status.success? && stdout.include?("ok (1 commit)")
+    failures << "valid update failed: stdout=#{stdout.inspect}, stderr=#{stderr.inspect}"
+  end
+
+  invalid_update = "refs/heads/main #{invalid_oid} refs/heads/main #{legacy_oid}\n"
+  _stdout, stderr, status = capture(
+    validator,
+    "origin",
+    "git@example.test:owner/repo.git",
+    chdir: fixture_root,
+    stdin_data: invalid_update
+  )
+  unless !status.success? && stderr.include?(invalid_oid[0, 12]) &&
+         stderr.include?("Push stopped before Git transferred the commit objects")
+    failures << "invalid update was not rejected clearly: stderr=#{stderr.inspect}"
+  end
+
+  whitespace_update = "refs/heads/topic #{whitespace_oid} refs/heads/topic #{valid_oid}\n"
+  stdout, stderr, status = capture(
+    validator,
+    "origin",
+    "git@example.test:owner/repo.git",
+    chdir: fixture_root,
+    stdin_data: whitespace_update
+  )
+  combined_output = "#{stdout}\n#{stderr}"
+  unless !status.success? && combined_output.include?("whitespace check failed")
+    failures << "outgoing whitespace was accepted: output=#{combined_output.inspect}"
+  end
+
+  git("update-ref", "refs/remotes/origin/main", legacy_oid, chdir: fixture_root)
+  new_ref_update = "refs/heads/topic #{valid_oid} refs/heads/topic #{ZERO_OID}\n"
+  stdout, stderr, status = capture(
+    hook,
+    "origin",
+    "git@example.test:owner/repo.git",
+    chdir: fixture_root,
+    stdin_data: new_ref_update
+  )
+  unless status.success? && stdout.include?("ok (1 commit)") &&
+         stdout.include?("fixture snapshot check: ok") &&
+         stdout.include?("validate-push: ok (1 snapshot)")
+    failures << "new-ref hook validation failed: stdout=#{stdout.inspect}, stderr=#{stderr.inspect}"
+  end
+
+  deletion = "(delete) #{ZERO_OID} refs/heads/topic #{valid_oid}\n"
+  stdout, stderr, status = capture(
+    validator,
+    "origin",
+    "git@example.test:owner/repo.git",
+    chdir: fixture_root,
+    stdin_data: deletion
+  )
+  unless status.success? && stdout.include?("ok (no new commits)")
+    failures << "deletion should be ignored: stdout=#{stdout.inspect}, stderr=#{stderr.inspect}"
+  end
+
+  _stdout, stderr, status = capture(
+    validator,
+    "origin",
+    "git@example.test:owner/repo.git",
+    chdir: fixture_root,
+    stdin_data: "malformed\n"
+  )
+  failures << "malformed input was accepted" if status.success? || !stderr.include?("malformed pre-push input")
+end
+
+if failures.empty?
+  puts "test-validate-pushed-commits: ok"
+else
+  warn "test-validate-pushed-commits failed:"
+  failures.each { |failure| warn "- #{failure}" }
+  exit 1
+end

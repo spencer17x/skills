@@ -19,7 +19,17 @@ Dir.mktmpdir("bootstrap-test") do |dir|
   fixture_root.join("scripts").mkpath
   fixture_root.join(".githooks").mkpath
 
-  %w[scripts/bootstrap scripts/validate-commit-message .githooks/commit-msg].each do |relative_path|
+  %w[
+    scripts/bootstrap
+    scripts/check
+    scripts/validate-staged
+    scripts/validate-commit-message
+    scripts/validate-push
+    scripts/validate-pushed-commits
+    .githooks/pre-commit
+    .githooks/commit-msg
+    .githooks/pre-push
+  ].each do |relative_path|
     source = ROOT.join(relative_path)
     destination = fixture_root.join(relative_path)
     FileUtils.cp(source, destination, preserve: true)
@@ -39,7 +49,8 @@ Dir.mktmpdir("bootstrap-test") do |dir|
   bootstrap = fixture_root.join("scripts/bootstrap")
 
   stdout, stderr, status = capture(environment, bootstrap, chdir: nested_dir)
-  unless status.success? && stdout.include?("bootstrap: configured core.hooksPath=.githooks")
+  unless status.success? && stdout.include?("bootstrap: configured core.hooksPath=.githooks") &&
+         stdout.include?("git ruby bash jq sort tar")
     failures << "first bootstrap run failed: stdout=#{stdout.inspect}, stderr=#{stderr.inspect}"
   end
 

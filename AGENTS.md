@@ -105,9 +105,13 @@ Detailed authoring rules live in
 - Keep commits atomic and exclude unrelated formatting or cleanup.
 - Use the skill name as scope for skill-specific changes and an infrastructure
   area such as `infra`, `validation`, or `release` for repository-wide changes.
+- Do not push directly to `main`. The active remote ruleset requires a pull
+  request and a successful, up-to-date `validate` check.
 - In a fresh contributor checkout, run `scripts/bootstrap` once before the first
-  commit. It checks prerequisites and enables the versioned Git hook without
+  commit. It checks prerequisites and enables the versioned Git hooks without
   replacing an existing custom hooks path.
+- Before handing off any tracked-file change, run the complete `scripts/check`
+  suite.
 - Before handing off a requested commit, validate its message with
   `scripts/validate-commit-message`.
 
@@ -120,7 +124,10 @@ Run the checks that match the files changed:
 | Skill, docs, metadata, or repository policy | `scripts/validate-skills` |
 | Contributor bootstrap | `scripts/test-bootstrap` |
 | Skill validator | `scripts/test-validate-skills` |
-| Commit-message validator or hook | `scripts/test-validate-commit-message` |
+| Staged-content validator or `pre-commit` hook | `scripts/test-validate-staged` |
+| Commit-message validator or `commit-msg` hook | `scripts/test-validate-commit-message` |
+| Outgoing-commit validator or `pre-push` hook | `scripts/test-validate-pushed-commits` |
+| Validation orchestration or CI workflow | `scripts/check` |
 | Shell helper | `bash -n <script>` and a small happy-path fixture when practical |
 | Any tracked-file change | `git diff --check` |
 

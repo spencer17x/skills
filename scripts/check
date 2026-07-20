@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'TEXT'
+Usage: scripts/check
+
+Run the complete deterministic repository validation suite used by CI.
+TEXT
+}
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  usage
+  exit 0
+fi
+
+if (( $# > 0 )); then
+  usage >&2
+  exit 2
+fi
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+
+"$script_dir/validate-skills"
+"$script_dir/test-bootstrap"
+"$script_dir/test-validate-skills"
+"$script_dir/test-validate-commit-message"
+"$script_dir/test-validate-staged"
+
+if [[ "${SKILLS_PRE_PUSH_ACTIVE:-0}" == "1" ]]; then
+  printf 'check: skipped recursive pre-push regression\n'
+else
+  "$script_dir/test-validate-pushed-commits"
+fi
+
+printf 'check: ok\n'

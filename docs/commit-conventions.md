@@ -99,7 +99,11 @@ feat: add scoring.
 
 Each commit should contain one coherent change and its directly related tests or
 documentation. Split unrelated cleanup into a separate commit. Do not leave
-`fixup!` or `squash!` commits in the final branch history.
+`fixup!`, `squash!`, or `amend!` commits in the final branch history.
+
+The local `commit-msg` hook permits temporary `fixup!`, `squash!`, and `amend!`
+commits when their target header is valid. The strict validator used by
+`pre-push` and CI rejects them, so autosquash before sharing the branch.
 
 Hosting-provider or Git-generated merge commits beginning with `Merge ` are
 exempt. Manually authored changes, including reverts, should use the normal
@@ -124,7 +128,7 @@ scripts/validate-commit-message .git/COMMIT_EDITMSG
 Run the validator regression suite after changing the policy implementation:
 
 ```bash
-scripts/test-validate-commit-message
+scripts/check
 ```
 
 To check prerequisites and enable validation for local commits in a fresh
@@ -135,9 +139,34 @@ scripts/bootstrap
 ```
 
 The bootstrap command is idempotent and refuses to replace an existing custom
-hooks path. Integrate the validator with that setup manually when needed. CI
-validates pull request titles and each new non-merge commit. The local hook is
-optional, but it provides earlier feedback with the same validator used by CI.
+hooks path. Integrate all three repository hooks with that setup manually when
+needed.
+
+Enforcement uses these local and audit layers:
+
+1. `.githooks/pre-commit` validates whitespace and repository policy against the
+   exact staged snapshot, ignoring unstaged changes.
+2. `.githooks/commit-msg` rejects invalid final messages while permitting valid
+   temporary autosquash commits locally.
+3. `.githooks/pre-push` strictly checks every new commit message and whitespace
+   change, then runs `scripts/check` against every unique committed tip snapshot
+   before Git transfers commit objects.
+4. CI independently validates pull request titles, every new commit, the event
+   range, and the same `scripts/check` suite so bypassed hooks and policy drift
+   remain visible.
+5. The active `main` ruleset rejects direct updates and requires an up-to-date,
+   successful `validate` check on a pull request before merge.
+
+Local hooks are not a security boundary: they can be omitted or bypassed with
+`--no-verify`. GitHub Actions cannot provide a before-transfer guarantee because
+workflows start after GitHub accepts a ref update. Commit-metadata rulesets can
+reject the ref update, but GitHub documents that rejected commit objects may
+remain retrievable even though they are unreachable from branches and tags. A
+literal server-controlled guarantee therefore requires a host where a
+`pre-receive` hook can run the validator. The current GitHub personal repository
+rejects `commit_message_pattern` rulesets, so the checked-in `pre-push` hook is
+the strongest available before-transfer guard for this remote.
+
 The validator enforces header structure, allowed type, scope shape, maximum
 length, terminal-period policy, and the blank line before a body. Reviewers are
 responsible for semantic guidance such as atomicity and body quality.

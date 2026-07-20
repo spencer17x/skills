@@ -253,12 +253,20 @@ end
 
 def validate_executable_files
   %w[
+    .githooks/pre-commit
     .githooks/commit-msg
+    .githooks/pre-push
     scripts/bootstrap
+    scripts/check
     scripts/test-bootstrap
     scripts/test-validate-commit-message
+    scripts/test-validate-pushed-commits
+    scripts/test-validate-staged
     scripts/test-validate-skills
     scripts/validate-commit-message
+    scripts/validate-push
+    scripts/validate-pushed-commits
+    scripts/validate-staged
     scripts/validate-skills
   ].each do |relative_path|
     path = ROOT.join(relative_path)
