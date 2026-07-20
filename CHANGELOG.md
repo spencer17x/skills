@@ -23,6 +23,17 @@ frontmatter.
   regression tests, an optional local `commit-msg` hook, and CI enforcement.
 - Added an idempotent contributor bootstrap command with prerequisite checks,
   safe Git hook configuration, custom-hook protection, and regression coverage.
+- Added pre-push validation that rejects invalid outgoing commit messages before
+  Git transfers commit objects, with bootstrap, CI, and regression coverage.
+- Added staged-snapshot `pre-commit` validation, committed-tip `pre-push`
+  validation, and a shared `scripts/check` entrypoint for local and CI checks.
+- Allowed valid temporary autosquash commits locally while keeping push and CI
+  validation strict.
+- Added an active no-bypass `main` ruleset requiring pull requests and the
+  up-to-date GitHub Actions `validate` check while blocking deletion and force
+  pushes.
+- Documented the server-side ruleset and `pre-receive` boundaries, including the
+  current GitHub limitation and unreachable-object behavior.
 
 ### Changed
 
@@ -32,6 +43,8 @@ frontmatter.
   workflow, change scope, Git policy, and verification.
 - Made `workflow-insights` session inventory output deterministic by sorting
   session files before processing.
+- Hardened GitHub Actions with read-only permissions, concurrency cancellation,
+  pull-request title edit events, complete commit-range checks, and a timeout.
 
 ### Fixed
 

@@ -2,39 +2,49 @@ name: Validate Skills
 
 'on':
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+      - ready_for_review
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Install jq
         run: |
           sudo apt-get update
           sudo apt-get install -y jq
 
-      - name: Validate repository
-        run: scripts/validate-skills
+      - name: Check repository
+        run: scripts/check
 
-      - name: Test maintenance tooling
-        run: |
-          scripts/test-bootstrap
-          scripts/test-validate-skills
-          scripts/test-validate-commit-message
-
-      - name: Validate commit messages
+      - name: Validate commit policy
         env:
           EVENT_NAME: ${{ github.event_name }}
           PR_TITLE: ${{ github.event.pull_request.title || '' }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
@@ -44,23 +54,26 @@ jobs:
           fi
 
           commit_list="$RUNNER_TEMP/commit-shas"
-          if [[ "$BASE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]] \
+            || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
             printf '%s\n' "$HEAD_SHA" > "$commit_list"
           else
-            git rev-list --reverse --no-merges "$BASE_SHA..$HEAD_SHA" > "$commit_list"
+            git rev-list --reverse "$BASE_SHA..$HEAD_SHA" > "$commit_list"
           fi
 
           while IFS= read -r commit_sha; do
             [[ -z "$commit_sha" ]] && continue
             git show -s --format=%B "$commit_sha" | scripts/validate-commit-message
+            git show --check --format= "$commit_sha"
           done < "$commit_list"
 
-      - name: Check whitespace errors
+      - name: Check range whitespace
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          if [[ "$BASE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]] \
+            || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
             BASE_SHA="$(git hash-object -t tree /dev/null)"
           fi
           git diff --check "$BASE_SHA" "$HEAD_SHA"

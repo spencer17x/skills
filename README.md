@@ -76,22 +76,27 @@ idempotent bootstrap command once after cloning:
 scripts/bootstrap
 ```
 
-It checks the required Git, Ruby, Bash, and `jq` commands and configures the
-versioned `commit-msg` hook. If the checkout already uses a custom hooks path,
-the command exits without replacing it.
+It checks the required Git, Ruby, Bash, `jq`, `sort`, and `tar` commands and
+configures the versioned `pre-commit`, `commit-msg`, and `pre-push` hooks. If the
+checkout already uses a custom hooks path, the command exits without replacing
+it.
+
+The hooks validate the staged snapshot, the commit message, and the exact
+committed snapshots being pushed. Temporary `fixup!`, `squash!`, and `amend!`
+commits are allowed while working locally but must be autosquashed before push.
 
 ## Validation
 
-Run the repository validator after changing skills, agent metadata, scripts, or
-Markdown links:
+Run the same complete check suite used by GitHub Actions:
 
 ```bash
-scripts/validate-skills
-scripts/test-bootstrap
-scripts/test-validate-skills
-scripts/test-validate-commit-message
+scripts/check
 ```
 
 GitHub Actions runs the same validation and regression tests on pull requests
-and pushes to `main`. It also checks pull request titles and new non-merge commit
-messages.
+and pushes to `main`. It also checks pull request titles, every new commit
+message, and whitespace introduced by the event range.
+
+The active `main` ruleset requires a pull request and a successful, up-to-date
+`validate` check produced by the GitHub Actions App. It also blocks branch
+deletion and force pushes; direct pushes to `main` are not allowed.

@@ -1,0 +1,166 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "open3"
+require "pathname"
+require "set"
+
+ROOT = Pathname.new(__dir__).join("..").realpath
+MESSAGE_VALIDATOR = ROOT.join("scripts/validate-commit-message")
+ZERO_OID = /\A0+\z/
+OID = /\A(?:[0-9a-f]{40}|[0-9a-f]{64})\z/
+
+def usage
+  <<~TEXT
+    Usage: scripts/validate-pushed-commits <remote-name> <remote-url>
+
+    Read Git pre-push updates from standard input and validate every commit that
+    the push would introduce to the remote.
+  TEXT
+end
+
+if ARGV == ["--help"] || ARGV == ["-h"]
+  puts usage
+  exit 0
+end
+
+unless ARGV.length == 2
+  warn usage
+  exit 2
+end
+
+remote_name = ARGV.first
+
+def git(*arguments)
+  Open3.capture3("git", *arguments, chdir: ROOT.to_s)
+end
+
+def resolve_commit(object_oid)
+  stdout, _stderr, status = git("rev-parse", "--verify", "#{object_oid}^{commit}")
+  status.success? ? stdout.strip : nil
+end
+
+def remote_tracking_commits(remote_name)
+  return [] unless remote_name.match?(/\A[0-9A-Za-z._-]+\z/)
+
+  stdout, stderr, status = git(
+    "for-each-ref",
+    "--format=%(objectname)",
+    "refs/remotes/#{remote_name}/"
+  )
+  unless status.success?
+    warn "validate-pushed-commits: cannot inspect #{remote_name.inspect}: #{stderr.strip}"
+    exit 1
+  end
+
+  stdout.lines(chomp: true).grep(OID).uniq
+end
+
+updates = []
+$stdin.each_line.with_index(1) do |line, line_number|
+  next if line.strip.empty?
+
+  fields = line.split
+  unless fields.length == 4 && fields[1].match?(OID) && fields[3].match?(OID)
+    warn "validate-pushed-commits: malformed pre-push input on line #{line_number}"
+    exit 2
+  end
+
+  updates << fields
+end
+
+commits = []
+seen = Set.new
+tracking_commits = nil
+
+updates.each do |local_ref, local_oid, remote_ref, remote_oid|
+  next if local_oid.match?(ZERO_OID)
+
+  local_commit = resolve_commit(local_oid)
+  if local_commit.nil?
+    if local_ref.start_with?("refs/heads/")
+      warn "validate-pushed-commits: #{local_ref} does not resolve to a commit"
+      exit 1
+    end
+
+    next
+  end
+
+  exclusions = if remote_oid.match?(ZERO_OID)
+                 tracking_commits ||= remote_tracking_commits(remote_name)
+               else
+                 remote_commit = resolve_commit(remote_oid)
+                 if remote_commit.nil?
+                   warn <<~TEXT.chomp
+                     validate-pushed-commits: cannot resolve remote object #{remote_oid} for #{remote_ref}
+                     Fetch #{remote_name.inspect} and retry so the outgoing commit range can be checked.
+                   TEXT
+                   exit 1
+                 end
+                 [remote_commit]
+               end
+
+  arguments = ["rev-list", "--reverse", local_commit]
+  arguments.concat(["--not", *exclusions]) unless exclusions.empty?
+  stdout, stderr, status = git(*arguments)
+  unless status.success?
+    warn "validate-pushed-commits: cannot enumerate #{local_ref}: #{stderr.strip}"
+    exit 1
+  end
+
+  stdout.lines(chomp: true).each do |oid|
+    next if seen.include?(oid)
+
+    seen << oid
+    commits << oid
+  end
+end
+
+failures = []
+commits.each do |oid|
+  problems = []
+  message, stderr, status = git("show", "-s", "--format=%B", oid)
+  unless status.success?
+    warn "validate-pushed-commits: cannot read commit #{oid}: #{stderr.strip}"
+    exit 1
+  end
+
+  _stdout, validation_error, validation_status = Open3.capture3(
+    MESSAGE_VALIDATOR.to_s,
+    stdin_data: message,
+    chdir: ROOT.to_s
+  )
+  problems << validation_error.strip unless validation_status.success?
+
+  whitespace_output, whitespace_error, whitespace_status = git(
+    "show",
+    "--check",
+    "--format=",
+    oid
+  )
+  unless whitespace_status.success?
+    details = [whitespace_output, whitespace_error].reject(&:empty?).join("\n").strip
+    problems << "whitespace check failed:\n#{details}"
+  end
+
+  next if problems.empty?
+
+  subject, = git("show", "-s", "--format=%s", oid)
+  failures << [oid, subject.strip, problems]
+end
+
+unless failures.empty?
+  warn "validate-pushed-commits failed:"
+  failures.each do |oid, subject, problems|
+    warn "- #{oid[0, 12]} #{subject}"
+    problems.each do |details|
+      details.each_line { |line| warn "  #{line.rstrip}" }
+    end
+  end
+  warn "Push stopped before Git transferred the commit objects."
+  warn "Rewrite the rejected commit messages, then push again."
+  exit 1
+end
+
+label = commits.empty? ? "no new commits" : "#{commits.length} commit#{commits.length == 1 ? "" : "s"}"
+puts "validate-pushed-commits: ok (#{label})"

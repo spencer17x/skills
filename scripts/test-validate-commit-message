@@ -26,7 +26,9 @@ invalid_messages = {
   "missing summary" => "fix: \n",
   "period at end of summary" => "fix: correct scoring.\n",
   "missing body separator" => "docs(infra): explain boundaries\nBody starts immediately.\n",
-  "header too long" => "docs: #{"a" * 101}\n"
+  "header too long" => "docs: #{"a" * 101}\n",
+  "temporary fixup" => "fixup! feat(resume): add role-fit checklist\n",
+  "temporary squash" => "squash! fix(workflow-insights): sort sessions\n"
 }
 
 failures = []
@@ -46,6 +48,20 @@ Tempfile.create("commit-message") do |file|
   file.flush
   _, stderr, status = Open3.capture3(HOOK.to_s, file.path, chdir: ROOT.to_s)
   failures << "commit-msg hook failed: #{stderr.strip}" unless status.success?
+end
+
+Tempfile.create("fixup-commit-message") do |file|
+  file.write("fixup! feat(resume): add role-fit checklist\n")
+  file.flush
+  _, stderr, status = Open3.capture3(HOOK.to_s, file.path, chdir: ROOT.to_s)
+  failures << "commit-msg hook rejected a temporary fixup: #{stderr.strip}" unless status.success?
+end
+
+Tempfile.create("invalid-fixup-target") do |file|
+  file.write("fixup! add role-fit checklist\n")
+  file.flush
+  _, _, status = Open3.capture3(HOOK.to_s, file.path, chdir: ROOT.to_s)
+  failures << "commit-msg hook accepted an invalid fixup target" if status.success?
 end
 
 if failures.empty?

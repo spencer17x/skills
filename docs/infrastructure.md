@@ -73,28 +73,34 @@ source tree by default.
 
 ## Validation Contract
 
-The current local prerequisites are Git, Ruby, Bash, and `jq`. The checks use no
-project-specific package installation or lockfile. The local validation surface
-is intentionally small:
+The current local prerequisites are Git, Ruby, Bash, `jq`, `sort`, and `tar`.
+The checks use no project-specific package installation or lockfile. The local
+validation surface is intentionally small:
 
 ```bash
-scripts/validate-skills
-scripts/test-bootstrap
-scripts/test-validate-skills
-scripts/test-validate-commit-message
+scripts/check
 git diff --check
 ```
 
-`scripts/validate-skills` checks skill shape and frontmatter, agent and workflow
-YAML, local Markdown links, maintenance-script syntax and executability, and
-small deterministic helper fixtures. The test scripts protect bootstrap and
-validator behavior against regression.
+`scripts/check` runs the repository validator and every maintenance regression
+test. `scripts/validate-skills` checks skill shape and frontmatter, agent and
+workflow YAML, local Markdown links, maintenance-script syntax and
+executability, and small deterministic helper fixtures.
 
 GitHub Actions is the remote enforcement layer. Pull requests and pushes to
 `main` run the same repository validation, validator tests, whitespace checks,
 and commit-message checks. Pull request titles are checked because they may
-become squash-merge messages; each new non-merge commit in the event range is
-checked as well.
+become squash-merge messages; each new commit in the event range is checked as
+well. The workflow uses read-only permissions, cancels superseded runs, reruns
+when a pull request title is edited, and has a bounded timeout.
+
+The active `Protect main with required CI` repository ruleset has no bypass
+actors. It blocks deletion and force pushes, requires all `main` changes to use a
+pull request, requires review threads to be resolved, and requires the
+GitHub Actions `validate` check to pass against an up-to-date branch. The
+required check is pinned to the GitHub Actions App rather than accepting an
+arbitrary status with the same name. This makes CI authoritative for reachable
+`main` history while leaving topic branches available for normal collaboration.
 
 Validation should fail fast with actionable output. A new invariant belongs in
 the local validator first, with a regression fixture when practical, and only
@@ -112,12 +118,17 @@ Contributors should initialize a fresh checkout with:
 scripts/bootstrap
 ```
 
-The command checks local prerequisites, validates the hook entrypoint, and
+The command checks local prerequisites, validates the hook entrypoints, and
 writes checkout-local Git configuration when no hooks path is already active.
 It is idempotent and refuses to override a custom local or global hooks path. In
-that case, integrate `.githooks/commit-msg` with the existing hook setup
-manually. The hook is optional developer ergonomics; CI remains authoritative.
-Existing history is not rewritten to satisfy newly introduced rules.
+that case, integrate `.githooks/pre-commit`, `.githooks/commit-msg`, and
+`.githooks/pre-push` with the existing hook setup manually. The first validates
+the exact index snapshot, the second validates the message, and the third checks
+all outgoing commits plus each unique committed tip snapshot. A server-side
+`pre-receive` hook is required for an enforcement boundary that clients cannot
+bypass; a hosting provider's commit-metadata ruleset can at least keep rejected
+commits out of reachable branch and tag history. Existing history is not
+rewritten to satisfy newly introduced rules.
 
 ## Release and Distribution
 

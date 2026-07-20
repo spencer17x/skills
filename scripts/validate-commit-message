@@ -5,30 +5,34 @@ ALLOWED_TYPES = %w[feat fix docs refactor perf test build ci chore revert].freez
 MAX_HEADER_LENGTH = 100
 SCOPE_PATTERN = /[a-z0-9]+(?:-[a-z0-9]+)*/
 HEADER_PATTERN = /\A(?<type>#{Regexp.union(ALLOWED_TYPES)})(?:\((?<scope>#{SCOPE_PATTERN})\))?(?<breaking>!)?: (?<summary>\S(?:.*\S)?)\z/
+FIXUP_PATTERN = /\A(?<kind>fixup|squash|amend)! (?<target>.+)\z/
 
 def usage
   <<~TEXT
-    Usage: scripts/validate-commit-message [commit-message-file]
+    Usage: scripts/validate-commit-message [--allow-fixup] [commit-message-file]
 
     Read a commit message from the given file, or from standard input when no
-    file is provided.
+    file is provided. --allow-fixup permits temporary fixup!, squash!, and
+    amend! commits for the local commit-msg hook only.
   TEXT
 end
 
-if ARGV == ["--help"] || ARGV == ["-h"]
+arguments = ARGV.dup
+if arguments == ["--help"] || arguments == ["-h"]
   puts usage
   exit 0
 end
 
-if ARGV.length > 1
+allow_fixup = !arguments.delete("--allow-fixup").nil?
+if arguments.length > 1 || arguments.first&.start_with?("-")
   warn usage
   exit 2
 end
 
-message = if ARGV.empty?
+message = if arguments.empty?
             $stdin.read
           else
-            path = ARGV.first
+            path = arguments.first
             unless File.file?(path)
               warn "validate-commit-message: cannot read #{path.inspect}"
               exit 2
@@ -40,28 +44,35 @@ lines = message.gsub(/\r\n?/, "\n").lines(chomp: true)
 lines.pop while lines.last == ""
 header = lines.first.to_s
 errors = []
+fixup = FIXUP_PATTERN.match(header)
 
 if header.empty?
   errors << "header must not be empty"
-elsif header.start_with?("Merge ")
-  exit 0
+elsif fixup && !allow_fixup
+  errors << "temporary #{fixup[:kind]}! commits must be autosquashed before push"
 else
-  if header.length > MAX_HEADER_LENGTH
-    errors << "header must be #{MAX_HEADER_LENGTH} characters or fewer (got #{header.length})"
-  end
+  checked_header = fixup ? fixup[:target] : header
+  header_label = fixup ? "fixup target header" : "header"
 
-  match = HEADER_PATTERN.match(header)
-  unless match
-    allowed = ALLOWED_TYPES.join(", ")
-    errors << "header must match type(optional-scope)!: summary"
-    errors << "allowed types: #{allowed}"
-    errors << "scope, when present, must be lowercase kebab-case"
-  else
-    errors << "summary must not end with a period" if match[:summary].end_with?(".", "。")
-  end
+  unless checked_header.start_with?("Merge ")
+    if checked_header.length > MAX_HEADER_LENGTH
+      errors << "#{header_label} must be #{MAX_HEADER_LENGTH} characters or fewer " \
+                "(got #{checked_header.length})"
+    end
 
-  if lines.length > 1 && !lines[1].empty?
-    errors << "body must be separated from the header by a blank line"
+    match = HEADER_PATTERN.match(checked_header)
+    unless match
+      allowed = ALLOWED_TYPES.join(", ")
+      errors << "#{header_label} must match type(optional-scope)!: summary"
+      errors << "allowed types: #{allowed}"
+      errors << "scope, when present, must be lowercase kebab-case"
+    else
+      errors << "summary must not end with a period" if match[:summary].end_with?(".", "。")
+    end
+
+    if lines.length > 1 && !lines[1].empty?
+      errors << "body must be separated from the header by a blank line"
+    end
   end
 end
 
