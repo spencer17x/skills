@@ -2,6 +2,95 @@
 
 This guide expands the `figma-ui` skill with detailed implementation rules for pixel-faithful UI work.
 
+## Contents
+
+- [Figma Link and Layer Intake](#figma-link-and-layer-intake)
+- [Layer-to-Implementation Mapping](#layer-to-implementation-mapping)
+- [Figma Analysis Checklist](#figma-analysis-checklist)
+- [Project Scan Checklist](#project-scan-checklist)
+- [Layout Rules](#layout-rules)
+- [Sizing Rules](#sizing-rules)
+- [Componentization Rules](#componentization-rules)
+- [Token Mapping](#token-mapping)
+- [Text and Overflow](#text-and-overflow)
+- [Assets and Media](#assets-and-media)
+- [Variant, State, and Responsive Coverage](#variant-state-and-responsive-coverage)
+- [Accessibility](#accessibility)
+- [Implementation Constraints](#implementation-constraints)
+- [Verification](#verification)
+- [Do Not](#do-not)
+
+## Figma Link and Layer Intake
+
+First determine the available input mode:
+
+1. **Structured mode:** A Figma integration, API, or supplied document export
+   exposes node IDs, types, properties, and parent-child relationships.
+2. **Visual-only mode:** Only a screenshot, rendered preview, or other pixel
+   reference is available.
+
+In visual-only mode, state that component hierarchy and constraints are inferred.
+Do not claim to have inspected Figma layers, variants, variables, or hidden
+content. If the user specifically requires layer-aware implementation, request
+structured access or a structured export before coding.
+
+In structured mode:
+
+1. Parse the link and resolve its file and target `node-id` when present.
+2. If the link targets a file or page rather than a specific frame, enumerate
+   candidate frames and confirm the implementation target when it is ambiguous.
+3. Recursively traverse the target node's complete descendant subtree. Preserve
+   node ID, name, type, parent-child order, visibility, and relevant layout,
+   style, content, interaction, and asset properties.
+4. Inspect the ancestor path through its containing Frame, Section, and Page
+   when those nodes provide layout, variant, or responsive context.
+5. Resolve referenced Component, Component Set, Instance, Variant, Variable,
+   Style, image, vector, and other asset definitions needed to understand or
+   implement the target.
+6. Follow tool pagination, depth, or response-size continuations until the
+   target subtree is complete. Do not treat a truncated response as full
+   coverage.
+7. Inventory hidden, unavailable, unresolved, or intentionally excluded nodes
+   with a reason instead of silently dropping them.
+
+The complete relevant hierarchy means the full target subtree, necessary
+ancestors, and referenced definitions. It does not require scanning unrelated
+pages or frames in the same file.
+
+Before planning, report:
+
+- Target file, page, and root node name, type, and ID when available.
+- Number and types of nodes inspected when the tool exposes this information.
+- Component instances, variants, styles, variables, and assets referenced.
+- Hidden or deliberately excluded nodes.
+- Truncated, inaccessible, unresolved, or ambiguous data.
+
+## Layer-to-Implementation Mapping
+
+Use the inspected hierarchy to produce a concise mapping before coding. For each
+meaningful branch or repeated pattern, record:
+
+| Figma source | Design role | Implementation | Layout and sizing | Style source | Status |
+| --- | --- | --- | --- | --- | --- |
+| Node path or ID | Section, control, content, decoration, or state | Existing component, new component, DOM/CSS, asset, or deliberate omission | Flex, grid, overlay, fixed, or adaptive | Project token, component default, Figma value, or asset | Ready, unresolved, or omitted with reason |
+
+Derive implementation structure semantically:
+
+- Map existing Figma components and instances to existing project components
+  first.
+- Consider repeated structures, independent interactions, business regions,
+  and meaningful reusable units as component candidates.
+- Treat Groups, Frames, and Auto Layout wrappers as layout evidence; keep them
+  as ordinary DOM or CSS unless they have independent meaning or reuse.
+- Treat vectors, masks, fills, and purely decorative layers as assets, CSS, or
+  pseudo-elements when appropriate.
+- Use layer names as hints, not proof of component boundaries.
+- Do not create one front-end component for every Figma layer.
+
+Do not start implementation until the target root is known, traversal is
+complete or its limitations are disclosed, meaningful layers are mapped, and
+blocking references or product questions are resolved.
+
 ## Figma Analysis Checklist
 
 Before coding, inspect:
@@ -208,7 +297,31 @@ Clarify or decide according to project conventions:
 
 Do not use random external image URLs.
 
-## Responsive Behavior
+## Variant, State, and Responsive Coverage
+
+Before coding, create a coverage matrix for every explicitly designed or
+product-required variant, state, and responsive frame:
+
+| Figma source | Coverage axis | Values or target frames | Implementation | Status |
+| --- | --- | --- | --- | --- |
+| Component Set, interaction, or frame IDs | Variant property, state, or viewport | Relevant values, states, or dimensions | Project component behavior, new implementation, or test target | Ready, inherited, out of scope with reason, or unresolved |
+
+Include relevant:
+
+- Component Set properties and Variant values.
+- Instance properties that alter visible content or behavior.
+- Hover, active, focus, disabled, selected, loading, error, empty, expanded,
+  and collapsed states.
+- Prototype destinations, overlays, and transitions that define required
+  product behavior.
+- Desktop, tablet, mobile, and other explicitly supplied responsive frames.
+
+Cover the combinations shown in Figma or required by the product. Do not
+generate the full Cartesian product of every property unless those combinations
+are meaningful. Use the matrix to choose implementation, test, and screenshot
+targets, and disclose every inherited, unresolved, or out-of-scope entry.
+
+### Responsive Behavior
 
 If Figma provides multiple breakpoints, implement each relevant breakpoint.
 
@@ -216,7 +329,7 @@ If Figma only provides desktop design, ask whether mobile or tablet adaptation i
 
 Use the project's existing breakpoints and responsive patterns.
 
-## Interaction States
+### Interaction States
 
 Implement Figma-provided states when available:
 
@@ -232,6 +345,30 @@ Implement Figma-provided states when available:
 - Collapsed.
 
 If Figma omits states but project components already support them, inherit the project component behavior. If a missing state affects product behavior, ask the user.
+
+## Accessibility
+
+Treat accessibility as an implementation requirement even when Figma does not
+encode it:
+
+- Prefer native semantic elements and controls. Use ARIA only when native
+  semantics are insufficient.
+- Preserve meaningful heading order, landmarks, reading order, and accessible
+  names and descriptions.
+- Make every interaction keyboard operable with a logical focus order and a
+  visible focus indicator.
+- Manage focus correctly for modals, drawers, menus, popovers, and other
+  layered interactions.
+- Do not communicate meaning or state through color alone. Follow the project's
+  contrast requirements.
+- Provide text alternatives for informative images and icons, and hide purely
+  decorative assets from assistive technology.
+- Honor the project's reduced-motion behavior for non-essential animation.
+- Reuse existing component accessibility behavior and do not regress it while
+  matching the Figma appearance.
+
+If visual fidelity conflicts with semantic or accessible behavior, preserve
+accessibility and disclose the visual difference.
 
 ## Implementation Constraints
 
@@ -259,24 +396,60 @@ After implementation, run the relevant available checks when possible:
 - Storybook.
 - Playwright or browser screenshot.
 - Visual diff against a Figma export or reference screenshot when available.
+- Available accessibility automation plus a keyboard and focus smoke test.
+
+### Visual Verification Loop
+
+When a rendered reference is available:
+
+1. Define comparison targets from the coverage matrix.
+2. Match each target's viewport or frame dimensions, browser zoom, theme,
+   content, state, and loaded fonts and assets. Record any comparison condition
+   that cannot be matched.
+3. Stabilize dynamic data and motion when the project supports doing so, then
+   capture the implementation screenshot.
+4. Compare it with the Figma render using an overlay, visual diff, or careful
+   side-by-side inspection.
+5. Fix differences in this order: structure and geometry, typography, color and
+   effects, assets, then micro-spacing.
+6. Repeat capture and comparison until the result meets the user or project's
+   acceptance criteria. Document remaining differences rather than claiming
+   pixel fidelity without evidence.
+
+If screenshot tooling is unavailable, perform the strongest available manual
+comparison and state the limitation.
 
 In the final summary, include:
 
-1. Files changed.
-2. Components reused.
-3. Components created.
-4. Styles sourced from project tokens.
-5. Styles sourced from Figma raw values.
-6. Fixed-size decisions.
-7. Adaptive-size decisions.
-8. Known differences from Figma.
-9. How to run and verify.
-10. Checks that passed or could not be run.
+1. Target Figma root and layer coverage.
+2. Unresolved references and deliberate layer omissions.
+3. Variant, state, and responsive coverage status.
+4. Files changed.
+5. Components reused.
+6. Components created.
+7. Styles sourced from project tokens.
+8. Styles sourced from Figma raw values.
+9. Accessibility decisions and checks.
+10. Fixed-size decisions.
+11. Adaptive-size decisions.
+12. Visual comparison conditions and results.
+13. Known differences from Figma.
+14. How to run and verify.
+15. Checks that passed or could not be run.
 
 ## Do Not
 
 Do not:
 
+- Claim complete Figma layer inspection from pixels alone.
+- Stop at the first partial or truncated structured-node response.
+- Scan unrelated Figma pages when the linked target and its dependencies are
+  already clear.
+- Map every Figma layer to a separate front-end component.
+- Validate only the default state or a single viewport when more targets are in
+  scope.
+- Sacrifice semantics, keyboard operation, or focus behavior for visual fidelity.
+- Claim pixel fidelity without a matched, repeatable visual comparison.
 - Code before scanning project conventions.
 - Create new components before checking existing ones.
 - Hardcode large amounts of color, spacing, typography, or layout values.

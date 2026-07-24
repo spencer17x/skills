@@ -37,6 +37,10 @@ frontmatter.
 
 ### Changed
 
+- Expanded `figma-ui` with structured Figma link target resolution, complete
+  relevant layer traversal, semantic layer-to-implementation mapping,
+  variant/state/responsive coverage, accessibility guardrails, and repeatable
+  visual verification.
 - Documented `agents/` as an optional skill subdirectory for agent-specific
   metadata.
 - Expanded `AGENTS.md` into the repository-wide working agreement for agent
