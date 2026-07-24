@@ -62,7 +62,7 @@ considered.
 author change
   -> local validation
   -> pull request and CI
-  -> merge to main
+  -> squash merge to main
   -> changelog and optional Git tag
   -> install or update by tag/SHA
 ```
@@ -89,10 +89,11 @@ executability, and small deterministic helper fixtures.
 
 GitHub Actions is the remote enforcement layer. Pull requests and pushes to
 `main` run the same repository validation, validator tests, whitespace checks,
-and commit-message checks. Pull request titles are checked because they may
-become squash-merge messages; each new commit in the event range is checked as
-well. The workflow uses read-only permissions, cancels superseded runs, reruns
-when a pull request title is edited, and has a bounded timeout.
+and relevant commit-message checks. Pull requests validate the title that will
+become the squash commit title without rejecting provisional topic-branch
+commit messages. Pushes to `main` validate the resulting commit range. The
+workflow uses read-only permissions, cancels superseded runs, reruns when a pull
+request title is edited, and has a bounded timeout.
 
 The active `Protect main with required CI` repository ruleset has no bypass
 actors. It blocks deletion and force pushes, requires all `main` changes to use a
@@ -101,6 +102,8 @@ GitHub Actions `validate` check to pass against an up-to-date branch. The
 required check is pinned to the GitHub Actions App rather than accepting an
 arbitrary status with the same name. This makes CI authoritative for reachable
 `main` history while leaving topic branches available for normal collaboration.
+Repository merge settings allow squash merges only and use the validated pull
+request title as the final commit title.
 
 Validation should fail fast with actionable output. A new invariant belongs in
 the local validator first, with a regression fixture when practical, and only
@@ -124,11 +127,15 @@ It is idempotent and refuses to override a custom local or global hooks path. In
 that case, integrate `.githooks/pre-commit`, `.githooks/commit-msg`, and
 `.githooks/pre-push` with the existing hook setup manually. The first validates
 the exact index snapshot, the second validates the message, and the third checks
-all outgoing commits plus each unique committed tip snapshot. A server-side
-`pre-receive` hook is required for an enforcement boundary that clients cannot
-bypass; a hosting provider's commit-metadata ruleset can at least keep rejected
-commits out of reachable branch and tag history. Existing history is not
+all outgoing commits plus each unique committed tip snapshot. These hooks are
+optional early feedback and may be bypassed by Codex App's built-in Git
+controls. Remote enforcement relies on the validated pull request title,
+required CI, protected `main`, and squash-only merges. Existing history is not
 rewritten to satisfy newly introduced rules.
+
+GitHub Actions runs after refs are updated. A host-controlled `pre-receive` hook
+would still be required for a client-independent before-transfer guarantee; this
+repository instead guarantees the validated history reachable from `main`.
 
 ## Release and Distribution
 

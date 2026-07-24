@@ -83,7 +83,12 @@ it.
 
 The hooks validate the staged snapshot, the commit message, and the exact
 committed snapshots being pushed. Temporary `fixup!`, `squash!`, and `amend!`
-commits are allowed while working locally but must be autosquashed before push.
+commits are allowed while working locally but are rejected by the optional
+pre-push hook.
+
+These hooks provide early feedback for terminal and agent-driven Git workflows.
+Codex App's built-in Git controls may bypass repository hooks, so remote
+enforcement does not depend on them.
 
 ## Validation
 
@@ -94,9 +99,13 @@ scripts/check
 ```
 
 GitHub Actions runs the same validation and regression tests on pull requests
-and pushes to `main`. It also checks pull request titles, every new commit
-message, and whitespace introduced by the event range.
+and pushes to `main`. For pull requests, it checks the pull request title and
+range whitespace without requiring provisional topic-branch commits to follow
+the final message convention. For pushes to `main`, it checks the resulting
+commit messages.
 
 The active `main` ruleset requires a pull request and a successful, up-to-date
 `validate` check produced by the GitHub Actions App. It also blocks branch
-deletion and force pushes; direct pushes to `main` are not allowed.
+deletion and force pushes; direct pushes to `main` are not allowed. Repository
+merge settings allow squash merges only and use the validated pull request title
+as the final commit title.

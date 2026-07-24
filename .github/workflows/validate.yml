@@ -40,7 +40,7 @@ jobs:
       - name: Check repository
         run: scripts/check
 
-      - name: Validate commit policy
+      - name: Validate merge message policy
         env:
           EVENT_NAME: ${{ github.event_name }}
           PR_TITLE: ${{ github.event.pull_request.title || '' }}
@@ -51,21 +51,21 @@ jobs:
 
           if [[ "$EVENT_NAME" == "pull_request" ]]; then
             printf '%s\n' "$PR_TITLE" | scripts/validate-commit-message
-          fi
-
-          commit_list="$RUNNER_TEMP/commit-shas"
-          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]] \
-            || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
-            printf '%s\n' "$HEAD_SHA" > "$commit_list"
           else
-            git rev-list --reverse "$BASE_SHA..$HEAD_SHA" > "$commit_list"
-          fi
+            commit_list="$RUNNER_TEMP/commit-shas"
+            if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]] \
+              || ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+              printf '%s\n' "$HEAD_SHA" > "$commit_list"
+            else
+              git rev-list --reverse "$BASE_SHA..$HEAD_SHA" > "$commit_list"
+            fi
 
-          while IFS= read -r commit_sha; do
-            [[ -z "$commit_sha" ]] && continue
-            git show -s --format=%B "$commit_sha" | scripts/validate-commit-message
-            git show --check --format= "$commit_sha"
-          done < "$commit_list"
+            while IFS= read -r commit_sha; do
+              [[ -z "$commit_sha" ]] && continue
+              git show -s --format=%B "$commit_sha" \
+                | scripts/validate-commit-message
+            done < "$commit_list"
+          fi
 
       - name: Check range whitespace
         env:
