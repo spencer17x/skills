@@ -27,8 +27,8 @@ frontmatter.
   Git transfers commit objects, with bootstrap, CI, and regression coverage.
 - Added staged-snapshot `pre-commit` validation, committed-tip `pre-push`
   validation, and a shared `scripts/check` entrypoint for local and CI checks.
-- Allowed valid temporary autosquash commits locally while keeping push and CI
-  validation strict.
+- Allowed valid temporary autosquash commits locally while keeping hook-enabled
+  pushes and final merge validation strict.
 - Added an active no-bypass `main` ruleset requiring pull requests and the
   up-to-date GitHub Actions `validate` check while blocking deletion and force
   pushes.
@@ -37,6 +37,13 @@ frontmatter.
 
 ### Changed
 
+- Aligned validation with Codex App Git workflows by enforcing Conventional
+  Commit formatting on pull request titles and final `main` commits, keeping
+  topic-branch messages provisional, and using squash-only merges.
+- Expanded `figma-ui` with structured Figma link target resolution, complete
+  relevant layer traversal, semantic layer-to-implementation mapping,
+  variant/state/responsive coverage, accessibility guardrails, and repeatable
+  visual verification.
 - Documented `agents/` as an optional skill subdirectory for agent-specific
   metadata.
 - Expanded `AGENTS.md` into the repository-wide working agreement for agent
@@ -44,7 +51,7 @@ frontmatter.
 - Made `workflow-insights` session inventory output deterministic by sorting
   session files before processing.
 - Hardened GitHub Actions with read-only permissions, concurrency cancellation,
-  pull-request title edit events, complete commit-range checks, and a timeout.
+  pull-request title edit events, event-range whitespace checks, and a timeout.
 
 ### Fixed
 

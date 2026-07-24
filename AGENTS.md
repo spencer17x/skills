@@ -101,12 +101,14 @@ Detailed authoring rules live in
 ## Git and Commit Messages
 
 - Follow [`docs/commit-conventions.md`](docs/commit-conventions.md).
-- Use Conventional Commit headers: `type(scope): summary`; scope is optional.
+- Use Conventional Commit headers for agent-authored commits and pull request
+  titles: `type(scope): summary`; scope is optional.
 - Keep commits atomic and exclude unrelated formatting or cleanup.
 - Use the skill name as scope for skill-specific changes and an infrastructure
   area such as `infra`, `validation`, or `release` for repository-wide changes.
 - Do not push directly to `main`. The active remote ruleset requires a pull
-  request and a successful, up-to-date `validate` check.
+  request, a successful up-to-date `validate` check, and a squash merge whose
+  final title comes from the validated pull request title.
 - In a fresh contributor checkout, run `scripts/bootstrap` once before the first
   commit. It checks prerequisites and enables the versioned Git hooks without
   replacing an existing custom hooks path.
