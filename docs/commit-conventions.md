@@ -139,16 +139,20 @@ Run the validator regression suite after changing the policy implementation:
 scripts/check
 ```
 
-To check prerequisites and enable validation for local commits in a fresh
-checkout:
+To check prerequisites without changing Git configuration:
 
 ```bash
 scripts/bootstrap
 ```
 
-The bootstrap command is idempotent and refuses to replace an existing custom
-hooks path. Integrate all three repository hooks with that setup manually when
-needed.
+To opt in to local hook feedback:
+
+```bash
+scripts/bootstrap --hooks
+```
+
+The opt-in command is idempotent and refuses to replace an existing custom hooks
+path. Hooks are not required; `scripts/check` and CI are authoritative.
 
 Enforcement uses these local and audit layers:
 

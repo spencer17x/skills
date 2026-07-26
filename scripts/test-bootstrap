@@ -49,14 +49,26 @@ Dir.mktmpdir("bootstrap-test") do |dir|
   bootstrap = fixture_root.join("scripts/bootstrap")
 
   stdout, stderr, status = capture(environment, bootstrap, chdir: nested_dir)
-  unless status.success? && stdout.include?("bootstrap: configured core.hooksPath=.githooks") &&
+  unless status.success? && stdout.include?("bootstrap: hooks not enabled") &&
          stdout.include?("git ruby bash jq sort tar")
-    failures << "first bootstrap run failed: stdout=#{stdout.inspect}, stderr=#{stderr.inspect}"
+    failures << "default bootstrap run failed: stdout=#{stdout.inspect}, stderr=#{stderr.inspect}"
   end
 
-  stdout, stderr, status = capture(environment, bootstrap, chdir: fixture_root)
+  stdout, _, status = capture(
+    environment,
+    "git", "config", "--local", "--get", "core.hooksPath",
+    chdir: fixture_root
+  )
+  failures << "default bootstrap unexpectedly configured hooks: #{stdout.inspect}" if status.success?
+
+  stdout, stderr, status = capture(environment, bootstrap, "--hooks", chdir: fixture_root)
+  unless status.success? && stdout.include?("bootstrap: configured core.hooksPath=.githooks")
+    failures << "opt-in bootstrap run failed: stdout=#{stdout.inspect}, stderr=#{stderr.inspect}"
+  end
+
+  stdout, stderr, status = capture(environment, bootstrap, "--hooks", chdir: fixture_root)
   unless status.success? && stdout.include?("bootstrap: already configured core.hooksPath=.githooks")
-    failures << "idempotent bootstrap run failed: stdout=#{stdout.inspect}, stderr=#{stderr.inspect}"
+    failures << "idempotent opt-in bootstrap run failed: stdout=#{stdout.inspect}, stderr=#{stderr.inspect}"
   end
 
   _, _, status = capture(
@@ -66,7 +78,7 @@ Dir.mktmpdir("bootstrap-test") do |dir|
   )
   failures << "custom hook fixture setup failed" unless status.success?
 
-  _, stderr, status = capture(environment, bootstrap, chdir: fixture_root)
+  _, stderr, status = capture(environment, bootstrap, "--hooks", chdir: fixture_root)
   unless !status.success? && stderr.include?("refusing to replace local core.hooksPath=.custom-hooks")
     failures << "custom local hook path was not protected: stderr=#{stderr.inspect}"
   end
@@ -86,7 +98,7 @@ Dir.mktmpdir("bootstrap-test") do |dir|
   )
   failures << "custom global hook fixture setup failed" unless status.success?
 
-  _, stderr, status = capture(environment, bootstrap, chdir: fixture_root)
+  _, stderr, status = capture(environment, bootstrap, "--hooks", chdir: fixture_root)
   unless !status.success? && stderr.include?("refusing to override effective core.hooksPath=.global-hooks")
     failures << "custom effective hook path was not protected: stderr=#{stderr.inspect}"
   end

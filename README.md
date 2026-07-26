@@ -69,26 +69,31 @@ SHAs to pin installs. Do not add hand-maintained version fields to source
 
 ## Contributor Setup
 
-Skill consumers do not need repository hooks. Contributors should run the
-idempotent bootstrap command once after cloning:
+Skill consumers do not need repository hooks. Contributors may run the
+non-mutating bootstrap command to check local prerequisites:
 
 ```bash
 scripts/bootstrap
 ```
 
-It checks the required Git, Ruby, Bash, `jq`, `sort`, and `tar` commands and
-configures the versioned `pre-commit`, `commit-msg`, and `pre-push` hooks. If the
-checkout already uses a custom hooks path, the command exits without replacing
-it.
+It checks the required Git, Ruby, Bash, `jq`, `sort`, and `tar` commands without
+changing Git configuration. To opt in to the versioned `pre-commit`,
+`commit-msg`, and `pre-push` hooks, run:
+
+```bash
+scripts/bootstrap --hooks
+```
+
+The opt-in mode is idempotent and refuses to replace a custom hooks path.
 
 The hooks validate the staged snapshot, the commit message, and the exact
 committed snapshots being pushed. Temporary `fixup!`, `squash!`, and `amend!`
 commits are allowed while working locally but are rejected by the optional
 pre-push hook.
 
-These hooks provide early feedback for terminal and agent-driven Git workflows.
-Codex App's built-in Git controls may bypass repository hooks, so remote
-enforcement does not depend on them.
+These hooks provide optional early feedback for terminal and agent-driven Git
+workflows. `scripts/check` and CI are authoritative; dependency or prerequisite
+setup never enables hooks automatically.
 
 ## Validation
 

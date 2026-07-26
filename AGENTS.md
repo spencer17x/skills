@@ -109,11 +109,12 @@ Detailed authoring rules live in
 - Do not push directly to `main`. The active remote ruleset requires a pull
   request, a successful up-to-date `validate` check, and a squash merge whose
   final title comes from the validated pull request title.
-- In a fresh contributor checkout, run `scripts/bootstrap` once before the first
-  commit. It checks prerequisites and enables the versioned Git hooks without
-  replacing an existing custom hooks path.
+- `scripts/bootstrap` may be used to check contributor prerequisites without
+  changing Git configuration. Hooks are strictly optional and require the
+  explicit `scripts/bootstrap --hooks` opt-in, which never replaces a custom
+  hooks path.
 - Before handing off any tracked-file change, run the complete `scripts/check`
-  suite.
+  suite. This command and CI are the authoritative quality gates.
 - Before handing off a requested commit, validate its message with
   `scripts/validate-commit-message`.
 

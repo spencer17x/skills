@@ -115,23 +115,27 @@ implementation of repository policy.
 [`docs/commit-conventions.md`](commit-conventions.md) defines the policy.
 `scripts/validate-commit-message` is its executable implementation.
 
-Contributors should initialize a fresh checkout with:
+Contributors may validate prerequisites in a fresh checkout with:
 
 ```bash
 scripts/bootstrap
 ```
 
-The command checks local prerequisites, validates the hook entrypoints, and
-writes checkout-local Git configuration when no hooks path is already active.
-It is idempotent and refuses to override a custom local or global hooks path. In
-that case, integrate `.githooks/pre-commit`, `.githooks/commit-msg`, and
-`.githooks/pre-push` with the existing hook setup manually. The first validates
-the exact index snapshot, the second validates the message, and the third checks
-all outgoing commits plus each unique committed tip snapshot. These hooks are
-optional early feedback and may be bypassed by Codex App's built-in Git
-controls. Remote enforcement relies on the validated pull request title,
-required CI, protected `main`, and squash-only merges. Existing history is not
-rewritten to satisfy newly introduced rules.
+The default command checks local prerequisites and validates hook entrypoints
+without changing Git configuration. Hooks require an explicit opt-in:
+
+```bash
+scripts/bootstrap --hooks
+```
+
+Opt-in is idempotent and refuses to override a custom local or global hooks
+path. In that case, contributors may integrate `.githooks/pre-commit`,
+`.githooks/commit-msg`, and `.githooks/pre-push` with their existing setup. The
+first validates the exact index snapshot, the second validates the message, and
+the third checks outgoing commits plus each unique committed tip snapshot.
+These hooks are optional early feedback. `scripts/check` and required CI are
+authoritative; existing history is not rewritten to satisfy newly introduced
+rules.
 
 GitHub Actions runs after refs are updated. A host-controlled `pre-receive` hook
 would still be required for a client-independent before-transfer guarantee; this

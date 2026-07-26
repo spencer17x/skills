@@ -3,9 +3,10 @@ set -euo pipefail
 
 usage() {
   cat <<'TEXT'
-Usage: scripts/bootstrap
+Usage: scripts/bootstrap [--hooks]
 
-Check contributor prerequisites and configure the repository-provided Git hooks.
+Check contributor prerequisites without changing Git configuration.
+Pass --hooks to explicitly opt in to the repository-provided Git hooks.
 TEXT
 }
 
@@ -14,10 +15,17 @@ fail() {
   exit 1
 }
 
-if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
-  usage
-  exit 0
-fi
+enable_hooks=false
+case "${1:-}" in
+  --help|-h)
+    usage
+    exit 0
+    ;;
+  --hooks)
+    enable_hooks=true
+    shift
+    ;;
+esac
 
 if (( $# > 0 )); then
   usage >&2
@@ -65,17 +73,6 @@ is_repo_hooks_path() {
   esac
 }
 
-local_hooks_path="$(git -C "$repo_root" config --local --get core.hooksPath 2>/dev/null || true)"
-effective_hooks_path="$(git -C "$repo_root" config --get core.hooksPath 2>/dev/null || true)"
-
-if [[ -n "$local_hooks_path" ]] && ! is_repo_hooks_path "$local_hooks_path"; then
-  fail "refusing to replace local core.hooksPath=$local_hooks_path"
-fi
-
-if [[ -n "$effective_hooks_path" ]] && ! is_repo_hooks_path "$effective_hooks_path"; then
-  fail "refusing to override effective core.hooksPath=$effective_hooks_path"
-fi
-
 printf '%s\n' 'chore(infra): verify commit hook setup' \
   | "$repo_root/scripts/validate-commit-message"
 "$repo_root/scripts/check" --help >/dev/null
@@ -83,14 +80,32 @@ printf '%s\n' 'chore(infra): verify commit hook setup' \
 "$repo_root/scripts/validate-push" --help >/dev/null
 "$repo_root/scripts/validate-pushed-commits" --help >/dev/null
 
-if [[ -n "$effective_hooks_path" ]]; then
-  hook_status="already configured"
+printf 'bootstrap: prerequisites ok (%s)\n' "${required_commands[*]}"
+
+if [[ "$enable_hooks" == true ]]; then
+  local_hooks_path="$(git -C "$repo_root" config --local --get core.hooksPath 2>/dev/null || true)"
+  effective_hooks_path="$(git -C "$repo_root" config --get core.hooksPath 2>/dev/null || true)"
+
+  if [[ -n "$local_hooks_path" ]] && ! is_repo_hooks_path "$local_hooks_path"; then
+    fail "refusing to replace local core.hooksPath=$local_hooks_path"
+  fi
+
+  if [[ -n "$effective_hooks_path" ]] && ! is_repo_hooks_path "$effective_hooks_path"; then
+    fail "refusing to override effective core.hooksPath=$effective_hooks_path"
+  fi
+
+  if [[ -n "$effective_hooks_path" ]]; then
+    hook_status="already configured"
+  else
+    git -C "$repo_root" config --local core.hooksPath .githooks
+    hook_status="configured"
+  fi
+
+  printf 'bootstrap: %s core.hooksPath=%s\n' "$hook_status" \
+    "$(git -C "$repo_root" config --get core.hooksPath)"
 else
-  git -C "$repo_root" config --local core.hooksPath .githooks
-  hook_status="configured"
+  printf '%s\n' \
+    'bootstrap: hooks not enabled (run scripts/bootstrap --hooks to opt in)'
 fi
 
-printf 'bootstrap: prerequisites ok (%s)\n' "${required_commands[*]}"
-printf 'bootstrap: %s core.hooksPath=%s\n' "$hook_status" \
-  "$(git -C "$repo_root" config --get core.hooksPath)"
 printf 'bootstrap: ok\n'
