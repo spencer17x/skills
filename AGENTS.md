@@ -7,7 +7,7 @@ text-first, deterministic, and easy to install across compatible coding agents.
 
 The root `AGENTS.md` applies to the whole repository. If a nested `AGENTS.md` is
 ever added, follow the nearest file for that subtree without weakening these
-repository-wide safety and validation rules.
+repository-wide safety rules.
 
 ## Start Here
 
@@ -27,9 +27,6 @@ asks for that action.
 ```text
 skills/<skill-name>/       installable, self-contained skills
 docs/                      repository conventions and operator documentation
-scripts/                   deterministic repository maintenance commands
-.githooks/                 optional local Git policy enforcement
-.github/workflows/         CI policy enforcement
 AGENTS.md                   agent working agreement
 CHANGELOG.md                human-readable source changes
 ```
@@ -49,10 +46,10 @@ skills/<skill-name>/
   agents/      # optional agent-specific metadata or prompts
 ```
 
-Root `scripts/` is for repository maintenance only. Standalone MCP servers,
-runtime services, credentials, or dependency-heavy tools belong in a separate
-repository. See [`docs/infrastructure.md`](docs/infrastructure.md) for the full
-boundary and lifecycle design.
+Standalone MCP servers, runtime services, credentials, or dependency-heavy
+tools belong in a separate repository. See
+[`docs/infrastructure.md`](docs/infrastructure.md) for the full boundary and
+lifecycle design.
 
 ## Skill Contract
 
@@ -77,13 +74,9 @@ Detailed authoring rules live in
 
 - Preserve backward compatibility unless the request explicitly requires a
   breaking change; document intentional breaks prominently.
-- Prefer standard-library, dependency-free maintenance tooling. New runtime or
-  network dependencies need a clear repository-level justification.
-- Keep scripts deterministic, non-interactive by default, and explicit about
-  failures through actionable stderr output and a non-zero exit status.
 - Update `README.md` when discoverability, installation, or the public project
   shape changes.
-- Update `CHANGELOG.md` for user-visible skill, documentation, tooling, CI, or
+- Update `CHANGELOG.md` for user-visible skill, documentation, tooling, or
   installation changes.
 - Do not commit credentials, tokens, private data, local machine paths, caches,
   build artifacts, or generated installer metadata.
@@ -100,39 +93,15 @@ Detailed authoring rules live in
 
 ## Git and Commit Messages
 
-- Follow [`docs/commit-conventions.md`](docs/commit-conventions.md).
-- Use Conventional Commit headers for agent-authored commits and pull request
-  titles: `type(scope): summary`; scope is optional.
 - Keep commits atomic and exclude unrelated formatting or cleanup.
-- Use the skill name as scope for skill-specific changes and an infrastructure
-  area such as `infra`, `validation`, or `release` for repository-wide changes.
-- Do not push directly to `main`. The active remote ruleset requires a pull
-  request, a successful up-to-date `validate` check, and a squash merge whose
-  final title comes from the validated pull request title.
-- `scripts/bootstrap` may be used to check contributor prerequisites without
-  changing Git configuration. Hooks are strictly optional and require the
-  explicit `scripts/bootstrap --hooks` opt-in, which never replaces a custom
-  hooks path.
-- Before handing off any tracked-file change, run the complete `scripts/check`
-  suite. This command and CI are the authoritative quality gates.
-- Before handing off a requested commit, validate its message with
-  `scripts/validate-commit-message`.
+- Write concise, descriptive commit subjects. Conventional Commit prefixes may
+  be used when helpful but are not enforced.
+- Direct pushes to `main` are allowed in this personal repository when the user
+  requests them.
 
 ## Verification
 
-Run the checks that match the files changed:
-
-| Change | Required checks |
-| --- | --- |
-| Skill, docs, metadata, or repository policy | `scripts/validate-skills` |
-| Contributor bootstrap | `scripts/test-bootstrap` |
-| Skill validator | `scripts/test-validate-skills` |
-| Staged-content validator or `pre-commit` hook | `scripts/test-validate-staged` |
-| Commit-message validator or `commit-msg` hook | `scripts/test-validate-commit-message` |
-| Outgoing-commit validator or `pre-push` hook | `scripts/test-validate-pushed-commits` |
-| Validation orchestration or CI workflow | `scripts/check` |
-| Shell helper | `bash -n <script>` and a small happy-path fixture when practical |
-| Any tracked-file change | `git diff --check` |
-
-Before handoff, inspect `git status --short` and the final diff. Report what was
-changed, what was verified, and any check that could not be run.
+Run checks that are specific to the skill or helper being changed when they
+exist. Before handoff, inspect `git status --short`, run `git diff --check`, and
+review the final diff. Report what was changed, what was verified, and any check
+that could not be run.

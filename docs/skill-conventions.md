@@ -15,7 +15,6 @@ skills/
     scripts/     # optional
     assets/      # optional
     agents/      # optional
-scripts/
 ```
 
 All installable skills should live directly under `skills/<skill-name>/`.
@@ -23,9 +22,6 @@ Do not create category folders such as `skills/engineering/` or
 `skills/writing/` by default. If the repository becomes large enough to need
 navigation help, add an index or metadata first before introducing nested
 categories.
-
-The root-level `scripts/` directory is reserved for repository maintenance
-scripts only.
 
 ## Skill Layout
 
@@ -101,13 +97,3 @@ or tests.
 
 Small deterministic helpers that support one skill can live under that skill's
 `scripts/` directory.
-
-## Validation
-
-Run the repository validator after changing skills, metadata, scripts, or
-Markdown links:
-
-```bash
-scripts/validate-skills
-scripts/test-validate-skills
-```

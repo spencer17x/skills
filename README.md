@@ -2,9 +2,9 @@
 
 Personal AI agent skills collection.
 
-This repository is organized as a lightweight skills library: each skill lives as
-a self-contained folder directly under `skills/`, while shared conventions and
-maintenance scripts stay at the repo root.
+This repository is organized as a lightweight skills library: each skill lives
+as a self-contained folder directly under `skills/`, while shared conventions
+stay at the repo root.
 
 ## Structure
 
@@ -51,8 +51,7 @@ rules for adding and updating skills.
 
 Repository governance and automation boundaries are described in
 [`AGENTS.md`](AGENTS.md) and
-[`docs/infrastructure.md`](docs/infrastructure.md). New commits follow
-[`docs/commit-conventions.md`](docs/commit-conventions.md).
+[`docs/infrastructure.md`](docs/infrastructure.md).
 
 ## Installation
 
@@ -67,50 +66,9 @@ Track source changes in [`CHANGELOG.md`](CHANGELOG.md). Use Git tags or commit
 SHAs to pin installs. Do not add hand-maintained version fields to source
 `SKILL.md` frontmatter.
 
-## Contributor Setup
+## Development
 
-Skill consumers do not need repository hooks. Contributors may run the
-non-mutating bootstrap command to check local prerequisites:
-
-```bash
-scripts/bootstrap
-```
-
-It checks the required Git, Ruby, Bash, `jq`, `sort`, and `tar` commands without
-changing Git configuration. To opt in to the versioned `pre-commit`,
-`commit-msg`, and `pre-push` hooks, run:
-
-```bash
-scripts/bootstrap --hooks
-```
-
-The opt-in mode is idempotent and refuses to replace a custom hooks path.
-
-The hooks validate the staged snapshot, the commit message, and the exact
-committed snapshots being pushed. Temporary `fixup!`, `squash!`, and `amend!`
-commits are allowed while working locally but are rejected by the optional
-pre-push hook.
-
-These hooks provide optional early feedback for terminal and agent-driven Git
-workflows. `scripts/check` and CI are authoritative; dependency or prerequisite
-setup never enables hooks automatically.
-
-## Validation
-
-Run the same complete check suite used by GitHub Actions:
-
-```bash
-scripts/check
-```
-
-GitHub Actions runs the same validation and regression tests on pull requests
-and pushes to `main`. For pull requests, it checks the pull request title and
-range whitespace without requiring provisional topic-branch commits to follow
-the final message convention. For pushes to `main`, it checks the resulting
-commit messages.
-
-The active `main` ruleset requires a pull request and a successful, up-to-date
-`validate` check produced by the GitHub Actions App. It also blocks branch
-deletion and force pushes; direct pushes to `main` are not allowed. Repository
-merge settings allow squash merges only and use the validated pull request title
-as the final commit title.
+This personal repository intentionally has no repository-managed Git hooks,
+commit-message linter, GitHub Actions validation workflow, or protected `main`
+rule. Review the diff and run any checks supplied by the skill being changed
+before committing and pushing directly to `main`.
