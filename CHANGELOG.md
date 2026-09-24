@@ -10,6 +10,8 @@ frontmatter.
 
 ### Added
 
+- Added `xxyy-trade-check` with Chinese trade investigation guidance, XXYY
+  screenshot evidence, loss calculation references, and agent metadata.
 - Added initial changelog entries for the existing `figma-ui`, `resume`, and
   `workflow-insights` skills.
 - Added `AGENTS.md` repository instructions for AI agents.

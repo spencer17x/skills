@@ -1,0 +1,6 @@
+interface:
+  display_name: "XXYY 交易核查"
+  short_description: "直接发交易哈希或链接，查询XXYY错池、被夹等问题，附截图与损失计算"
+  default_prompt: "使用 $xxyy-trade-check 查询这笔交易是否走错池或被夹，结合链上数据提供红圈截图、损失金额、计算逻辑和总结。"
+policy:
+  allow_implicit_invocation: true

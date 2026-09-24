@@ -31,6 +31,7 @@ keep all skills directly under `skills/<skill-name>/`.
 | `figma-ui` | Implement UI from Figma or visual references with project tokens, component reuse, flex-first layout, explicit sizing decisions, and high visual fidelity. |
 | `resume` | Create, revise, tailor, review, or export resume materials with ownership, evidence, impact, and interview-ready positioning. |
 | `workflow-insights` | Review recent work and suggest reusable skills, subagents, automations, or deliberate skips for repeated workflows. |
+| `xxyy-trade-check` | Check XXYY trades for pool routing issues, sandwich attacks, fees, and losses using on-chain evidence and annotated screenshots; reports in Chinese. |
 
 ## Conventions
 
